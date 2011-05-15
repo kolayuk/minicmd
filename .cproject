@@ -28,7 +28,7 @@
 <ARGUMENTS_DATA_ID ABLDFREEZEARGSSTORAGE="-r"/>
 <ROM_BUILDER_DATA_ID ROMBUILDWORKINGDIRECTORYSTORAGE="C:\"/>
 </storageModule>
-<storageModule filesCache="D:\Symbian\Carbide\workspace\MiniCMD\group\MiniCMD.mmp;D:\Symbian\Carbide\workspace\MiniCMD\group\bld.inf;" includesCache="D:/Symbian/Carbide/workspace/MiniCMD/inc[LOCAL];D:/Symbian/S60/devices/S60_3rd_FP2_SDK_v1.1/epoc32/include;" macrosCache="_UNICODE;__SUPPORT_CPP_EXCEPTIONS__;__S60_32__;__MARM_ARMV5__;NDEBUG;__SYMBIAN32__;__GCCE__;__MARM__;__EXE__;__SERIES60_3X__;__S60_3X__;__GENERIC_MARM__;__EPOC32__;__EABI__;" moduleId="configDataCache" sourcesCache="/MiniCMD/data;/MiniCMD/inc;/MiniCMD/src;" timestampCache="1305448312390" useMmpMacrosCache="true"/>
+<storageModule filesCache="D:\Symbian\Carbide\workspace\MiniCMD\group\MiniCMD.mmp;D:\Symbian\Carbide\workspace\MiniCMD\group\bld.inf;" includesCache="D:/Symbian/Carbide/workspace/MiniCMD/inc[LOCAL];D:/Symbian/S60/devices/S60_3rd_FP2_SDK_v1.1/epoc32/include;" macrosCache="_UNICODE;__SUPPORT_CPP_EXCEPTIONS__;__S60_32__;__MARM_ARMV5__;NDEBUG;__SYMBIAN32__;__GCCE__;__MARM__;__EXE__;__SERIES60_3X__;__S60_3X__;__GENERIC_MARM__;__EPOC32__;__EABI__;" moduleId="configDataCache" sourcesCache="/MiniCMD/data;/MiniCMD/inc;/MiniCMD/src;" timestampCache="1305452141644" useMmpMacrosCache="true"/>
 <storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
 <storageModule moduleId="org.eclipse.cdt.core.language.mapping"/>
 <storageModule moduleId="org.eclipse.cdt.internal.ui.text.commentOwnerProjectMappings"/>

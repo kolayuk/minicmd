@@ -517,11 +517,13 @@ void ParseCMD(TDes &aCMD, TDes &aSrc, TDes *aDest/* = NULL*/, Param *aParam/* = 
     {
         if (aSrc.Length() < 0)
             return ;
-
-        //Important to +1 when the first path enclosed by quote
-        aCMD.Delete(0, aSrc.Length() + 1);
+        //Important to +2 when the first path enclosed by quote
+        if (aCMD[0] == '"')
+            aCMD.Delete(0, aSrc.Length() + 2);
+        else
+            aCMD.Delete(0, aSrc.Length());
+        
         aCMD.TrimLeft();
-
         FindPath(aCMD, *aDest);
     }
 }
