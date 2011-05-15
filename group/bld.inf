@@ -1,0 +1,16 @@
+/*
+============================================================================
+ Name		: bld.inf
+ Author	  : Just Fancy
+ Copyright   : hi.baidu.com/justfancy
+ Description : This file provides the information required for building the
+				whole of a TinyCMD.
+============================================================================
+*/
+
+PRJ_PLATFORMS
+DEFAULT
+
+PRJ_MMPFILES
+MiniCMD.mmp
+gnumakefile icons.mk

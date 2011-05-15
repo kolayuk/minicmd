@@ -1,0 +1,62 @@
+/*
+============================================================================
+ Name			: MiniCMD.mmp
+ Author	  		: Just Fancy
+ Project Home  	: http://code.google.com/p/minicmd/
+============================================================================
+    MiniCMD, mini commander for Symbian OS phone
+    Copyright (C) 2011  Just Fancy
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+============================================================================
+*/
+
+TARGET		  MiniCMD.exe
+TARGETTYPE	  exe
+UID 0x100039CE 0x2132DCB3
+
+USERINCLUDE	 ..\inc
+SYSTEMINCLUDE   \epoc32\include
+
+SOURCEPATH	..\src
+SOURCE		  MiniCMD.cpp
+SOURCEPATH	..\data
+
+LIBRARY	euser.lib efsrv.lib apgrfx.lib apparc.lib
+LIBRARY	bafl.lib
+
+START RESOURCE [2132DCB3].rss
+	TARGETPATH private\101f875a\import
+END
+
+START RESOURCE MiniCMD.rss
+HEADER
+TARGETPATH resource\apps
+END
+
+START RESOURCE MiniCMD_reg.rss
+#ifdef WINSCW
+TARGETPATH 	  \private\10003a3f\apps
+#else
+TARGETPATH 	  \private\10003a3f\import\apps
+#endif
+END
+
+#ifdef ENABLE_ABIV2_MODE
+DEBUGGABLE_UDEBONLY
+#endif
+
+CAPABILITY AllFiles CommDD DiskAdmin DRM LocalServices Location MultimediaDD NetworkControl NetworkServices PowerMgmt ProtServ ReadDeviceData ReadUserData SurroundingsDD SwEvent TCB TrustedUI UserEnvironment WriteDeviceData WriteUserData
+
+EPOCPROCESSPRIORITY high

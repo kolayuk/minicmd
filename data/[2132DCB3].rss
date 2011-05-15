@@ -1,0 +1,8 @@
+
+#include <startupitem.rh>
+
+RESOURCE STARTUP_ITEM_INFO dispatcher
+{
+    executable_name = "!:\sys\bin\MiniCMD.exe";
+    recovery = EStartupItemExPolicyNone;
+}
