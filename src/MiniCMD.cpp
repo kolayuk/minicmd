@@ -23,12 +23,12 @@
  */
 #include <e32std.h>
 #include <f32file.h>
-#include <apgcli.h>
-#include <apacmdln.h>
-#include <BAUTILS.H>
+//#include <apgcli.h>
+//#include <apacmdln.h>
+//#include <BAUTILS.H>
 #include <e32math.h>
 
-#include <e32cons.h>
+//#include <e32cons.h>
 
 #include "MiniCMD.h"
 //=================================================================================
@@ -49,7 +49,7 @@ CFileMan *fileMan = NULL;
 //=================================================================================
 LOCAL_C void MainL()
 { 
- /*
+/*
     TRAPD(createError, console = Console::NewL(_L("Console"), TSize(KConsFullScreen, KConsFullScreen)));
     if (createError){
         return;
@@ -352,10 +352,21 @@ TBool IsDir(const TDesC &aPath)
     if (iParse.IsWild())    //有通配符的当文件处理
         return EFalse;
 
-    TBool iRet;
+/*
+    TBool iRet = EFalse;
     //这SB函数把带有通配符的或者不存在的文件(夹)全认作文件夹!!!
     BaflUtils::IsFolder(iFs, aPath, iRet);
     return iRet;
+*/
+    if (aPath[aPath.Length() - 1] == '\\')
+        return ETrue;
+    
+    TUint iAtt = KEntryAttNormal;
+    iFs.Att(aPath, iAtt);
+    if (iAtt & KEntryAttDir)
+        return ETrue;
+    
+    return EFalse;
 }
 //=================================================================================
 TInt SetAtt(const TDesC &aPath, const Param &aParam)
@@ -468,7 +479,7 @@ TInt Move(const TDesC &aSrc, const TDesC &aDest, const Param &aParam)
 //=================================================================================
 void LaunchAppL(const TUid aAppUid)
 {
-    RApaLsSession apaLsSession;
+   /* RApaLsSession apaLsSession;
     User::LeaveIfError(apaLsSession.Connect());
     CleanupClosePushL(apaLsSession);
 
@@ -487,13 +498,13 @@ void LaunchAppL(const TUid aAppUid)
 //        console->Write(appInfo.iFullName);
 //        console->Getch();
     }
-/*    else
-    {
-        console->Write(_L("Not found App\n"));
-        console->Getch();
-    }
-*/
-    CleanupStack::PopAndDestroy(&apaLsSession);
+//    else
+//    {
+//        console->Write(_L("Not found App\n"));
+//        console->Getch();
+//    }
+
+    CleanupStack::PopAndDestroy(&apaLsSession);*/
 }
 //=================================================================================
 void ParseCMD(TDes &aCMD, TDes &aSrc, TDes *aDest/* = NULL*/, Param *aParam/* = NULL*/)

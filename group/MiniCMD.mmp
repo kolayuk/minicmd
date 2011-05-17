@@ -23,7 +23,7 @@
 */
 
 TARGET		  MiniCMD.exe
-TARGETTYPE	  exe
+TARGETTYPE	  EXE
 UID 0x100039CE 0x2132DCB3
 
 USERINCLUDE	 ..\inc
@@ -31,10 +31,12 @@ SYSTEMINCLUDE   \epoc32\include
 
 SOURCEPATH	..\src
 SOURCE		  MiniCMD.cpp
-SOURCEPATH	..\data
 
-LIBRARY	euser.lib efsrv.lib apgrfx.lib apparc.lib
-LIBRARY	bafl.lib
+LIBRARY	euser.lib efsrv.lib
+//LIBRARY	apgrfx.lib apparc.lib
+//LIBRARY	bafl.lib
+
+SOURCEPATH	..\data
 
 START RESOURCE [2132DCB3].rss
 	TARGETPATH private\101f875a\import
@@ -60,3 +62,4 @@ DEBUGGABLE_UDEBONLY
 CAPABILITY AllFiles CommDD DiskAdmin DRM LocalServices Location MultimediaDD NetworkControl NetworkServices PowerMgmt ProtServ ReadDeviceData ReadUserData SurroundingsDD SwEvent TCB TrustedUI UserEnvironment WriteDeviceData WriteUserData
 
 EPOCPROCESSPRIORITY high
+
