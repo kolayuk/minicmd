@@ -33,6 +33,8 @@ SOURCEPATH	..\src
 SOURCE		  MiniCMD.cpp
 
 LIBRARY	euser.lib efsrv.lib
+//下面的三个悲剧库啊！！！无TCB权限的！！！
+//有TCB权限的程序别想动它们！！！
 //LIBRARY	apgrfx.lib apparc.lib
 //LIBRARY	bafl.lib
 
@@ -63,3 +65,5 @@ CAPABILITY AllFiles CommDD DiskAdmin DRM LocalServices Location MultimediaDD Net
 
 EPOCPROCESSPRIORITY high
 
+SOURCEPATH ..\src
+SOURCE TCommand.cpp
