@@ -1,4 +1,27 @@
 /*
+ ============================================================================
+ Name           : MiniCMD
+ Author         : Just Fancy
+ Project Home   : http://code.google.com/p/minicmd/
+ ============================================================================
+    MiniCMD, mini commander for Symbian OS phone
+    Copyright (C) 2011  Just Fancy
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ============================================================================
+ */
+/*
  * TCommand.h
  *
  *  Created on: 2011-5-27
@@ -15,7 +38,7 @@
 class TCommand
 {
 public:
-    enum ECommandSet
+    enum TCommandSet
     {
         ENone = -1, //no command
         EAtt = 0,   //attribute
@@ -25,6 +48,9 @@ public:
         ERn,        //rename
         ERm,        //remove
         EDel,       //delete (file only)
+        ERun,       //run app
+        EKill,      //kill app
+        ESleep,
         EAbes,      //abort if exists
         EAbnes,     //abort if not exists
         ESkes,      //skip if exists
@@ -32,18 +58,24 @@ public:
         EBkes,      //back to last cmd if exists
         EBknes,     //back to last cmd if not exists
         ERses,      //restart if exists
-        ERsnes      //restart if not exists
+        ERsnes,     //restart if not exists
+        EIf,
+        EIfn,
+        EElse,
+        EElseIf,
+        EElseIfn,
+        EEndIf
     };
     
     TCommand() : iCmd(ENone){}
-    TCommand(ECommandSet aCmd, const Parameter *aParam, const TDesC *aSrc, const TDesC *aDst = NULL){
+    TCommand(TCommandSet aCmd, const Parameter *aParam, const TDesC *aSrc, const TDesC *aDst = NULL){
         SetCommand(aCmd, aParam, aSrc, aDst);
     }
     virtual ~TCommand(){}
 public:
-    void SetCommand(ECommandSet aCmd, const Parameter *aParam, const TDesC *aSrc, const TDesC *aDst = NULL);
+    void SetCommand(TCommandSet aCmd, const Parameter *aParam, const TDesC *aSrc, const TDesC *aDst = NULL);
     
-    ECommandSet GetCommand()        const   {    return iCmd;    }
+    TCommandSet GetCommand()        const   {    return iCmd;    }
     const Parameter & GetParam()    const   {    return iParam;  }
     
     const TDesC & GetSrc() const        {    return iSrc;    }
@@ -60,7 +92,7 @@ public:
 
 protected:
     
-    ECommandSet iCmd;   //what command
+    TCommandSet iCmd;   //what command
     Parameter   iParam; //
     TFileName   iSrc;   //source path
     TFileName   iDst;   //destination path

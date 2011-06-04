@@ -1,6 +1,6 @@
 /*
  ============================================================================
- Name		    : MiniCMD.h
+ Name		    : MiniCMD
  Author	        : Just Fancy
  Project Home   : http://code.google.com/p/minicmd/
  ============================================================================
@@ -28,15 +28,10 @@
 
 #include "TCommand.h"
 //=================================================================================
-TInt    ParseBatFileL();
+TInt    LoadCmdFileL(const TDesC &aFileName);
 void    ParseLineL(TDes &aLine);
-
-//取得命令行中的一个路径
 TBool   FindPath(TDes &aLine, TDes &aPath);
-
-// 返回参数所占长度
 TInt    GetParams(TDes &aLine, Parameter &aParam);
-
 TInt    MkDir(const TDesC &aPath);
 TBool   IsDir(const TDesC &aPath);
 TInt    SetAtt(const TDesC &aPath, const Parameter &aParam);
@@ -50,7 +45,18 @@ void    ParseCMD(TDes &aCMD, TDes &aSrc, TDes *aDest = NULL, Parameter *aParam =
 TInt    DoCommand(const TCommand &aCmd);
 TBool   IsCmdDisabled();    //test if usr don't want to run minicmd
 TBool   IsFileExists(const TDesC &aFileName);
-void    SetDstAtt(const TDesC &aSrc, const TDesC &aDest, const Parameter &aParam);
+TBool   IsFolderExists(const TDesC &aFolder);
+TBool   IsPathExists(const TDesC &aPath);
+void    Run(const CArrayFixFlat<TCommand> &aCmdSet);
+void    MakeAtt(TUint &aSet, TUint &aClear, const Parameter &aParam);
+inline  void SkipCmd(const CArrayFixFlat<TCommand> &aCmdSet, TInt &i);
+TInt    RunApp(const TDesC &aName);
+TInt    KillApp(TInt aUid);
+TInt    KillApp(const TDesC &aName);
+TInt    DoKill(const TDesC &aStr);
+inline  void Sleep(TInt aMs);
+TInt32  HexStr2Int32(const TDesC & aHexStr);
+TInt32  DecStr2Int32(const TDesC &aDecStr);
 //=================================================================================
 #endif  // __MINI_CMD_H__
 //=================================================================================

@@ -21,47 +21,35 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ============================================================================
  */
-#ifndef __PARAMETER_H__
-#define	__PARAMETER_H__
+/*
+ * MiniLog.h
+ *
+ *  Created on: 2011-5-12
+ *      Author: Just Fancy
+ */
 
-#include <e32base.h>
+#ifndef __MINI_LOG_H__
+#define __MINI_LOG_H__
 
-enum AttStatus
+#include <f32file.h>
+#include <S32FILE.H>
+
+class CMiniLog : public CBase
 {
-    not_set = 0,    //not define
-    add_to,         //+
-    rm_it           //-
+public:
+    virtual ~CMiniLog();
+    
+    static CMiniLog* NewL(RFs &aFs);
+    static CMiniLog* NewLC(RFs &aFs);
+    
+    void Log(TRefByValue<const TDesC16> aFmt, ...);
+private:
+    void ConstructL(RFs &aFs);
+    void GetTimeStr(TDes &aBuf);
+protected:
+    RFile iFile;
+    RFileWriteStream iOutputStream;
+    RFs *iFs;
 };
 
-struct Parameter
-{
-    AttStatus s;    //sys attribute
-    AttStatus h;    //hidden
-    AttStatus r;    //read only
-    
-    TBool is;       //include subfolder?
-    TBool ow;       //overwrite exists file?
-    
-    Parameter()
-    {
-        s = h = r = not_set;
-        is = ow = EFalse;
-    }
-    
-    TBool NeedToSetAtt() const{
-        return s + h + r > 0;
-    }
-    
-    Parameter & operator = (const Parameter &other)
-    {
-        this->s = other.s;
-        this->h = other.h;
-        this->r = other.r;
-        this->is = other.is;
-        this->ow = other.ow;
-        
-        return *this;
-    }
-};
-
-#endif  /* __PARAMETER_H__ */
+#endif /* __MINI_LOG_H__ */

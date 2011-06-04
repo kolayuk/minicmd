@@ -21,47 +21,50 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ============================================================================
  */
-#ifndef __PARAMETER_H__
-#define	__PARAMETER_H__
+/*
+ * TFileMonitor.cpp
+ *
+ *  Created on: 2011-6-3
+ *      Author: Tim
+ */
 
-#include <e32base.h>
+#include "TFileMonitor.h"
 
-enum AttStatus
+extern RFs iFs;
+
+TFileMonitor::TFileMonitor(CFileMan &aFileMan)
+    : iFileMan(aFileMan)
 {
-    not_set = 0,    //not define
-    add_to,         //+
-    rm_it           //-
-};
+    mode = mode;
+    iSetAttMask = iClearAttMask = KEntryAttNormal;
+}
 
-struct Parameter
+MFileManObserver::TControl TFileMonitor::NotifyFileManStarted()
 {
-    AttStatus s;    //sys attribute
-    AttStatus h;    //hidden
-    AttStatus r;    //read only
-    
-    TBool is;       //include subfolder?
-    TBool ow;       //overwrite exists file?
-    
-    Parameter()
-    {
-        s = h = r = not_set;
-        is = ow = EFalse;
+    if (mode == EDelete)
+    {  
+        TFileName iSrc;
+        iFileMan.GetCurrentSource(iSrc);
+        //don't use iFileMan ...
+        iFs.SetAtt(iSrc,  KEntryAttNormal, KEntryAttReadOnly);
     }
     
-    TBool NeedToSetAtt() const{
-        return s + h + r > 0;
-    }
-    
-    Parameter & operator = (const Parameter &other)
-    {
-        this->s = other.s;
-        this->h = other.h;
-        this->r = other.r;
-        this->is = other.is;
-        this->ow = other.ow;
-        
-        return *this;
-    }
-};
+    return EContinue;
+}
 
-#endif  /* __PARAMETER_H__ */
+MFileManObserver::TControl TFileMonitor::NotifyFileManOperation()
+{
+    return EContinue;
+}
+
+MFileManObserver::TControl TFileMonitor::NotifyFileManEnded()
+{
+    if (mode == ECopy)
+    {
+        TFileName iDst;
+        iFileMan.GetCurrentTarget(iDst);
+        iFs.SetAtt(iDst, iSetAttMask, iClearAttMask);
+    }
+
+    return EContinue;
+}

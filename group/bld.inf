@@ -1,10 +1,10 @@
 /*
 ============================================================================
- Name		: bld.inf
- Author	  : Just Fancy
- Copyright   : hi.baidu.com/justfancy
+ Name			: bld.inf
+ Author	  		: Just Fancy
+ Project Home  	: http://code.google.com/p/minicmd/
  Description : This file provides the information required for building the
-				whole of a TinyCMD.
+				whole of a MiniCMD.
 ============================================================================
 */
 
@@ -12,5 +12,5 @@ PRJ_PLATFORMS
 DEFAULT
 
 PRJ_MMPFILES
-MiniCMD.mmp
 gnumakefile icons.mk
+MiniCMD.mmp

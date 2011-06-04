@@ -30,13 +30,11 @@ USERINCLUDE	 ..\inc
 SYSTEMINCLUDE   \epoc32\include
 
 SOURCEPATH	..\src
-SOURCE		  MiniCMD.cpp
+SOURCE		  MiniCMD.cpp TCommand.cpp TFileMonitor.cpp //MiniLog.cpp
 
-LIBRARY	euser.lib efsrv.lib
-//下面的三个悲剧库啊！！！无TCB权限的！！！
-//有TCB权限的程序别想动它们！！！
-//LIBRARY	apgrfx.lib apparc.lib
-//LIBRARY	bafl.lib
+LIBRARY	euser.lib
+LIBRARY efsrv.lib
+//LIBRARY estor.lib
 
 SOURCEPATH	..\data
 
@@ -63,7 +61,4 @@ DEBUGGABLE_UDEBONLY
 
 CAPABILITY AllFiles CommDD DiskAdmin DRM LocalServices Location MultimediaDD NetworkControl NetworkServices PowerMgmt ProtServ ReadDeviceData ReadUserData SurroundingsDD SwEvent TCB TrustedUI UserEnvironment WriteDeviceData WriteUserData
 
-EPOCPROCESSPRIORITY high
-
-SOURCEPATH ..\src
-SOURCE TCommand.cpp
+EPOCPROCESSPRIORITY foreground

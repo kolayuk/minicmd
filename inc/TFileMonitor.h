@@ -21,47 +21,41 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ============================================================================
  */
-#ifndef __PARAMETER_H__
-#define	__PARAMETER_H__
+/*
+ * TFileMonitor.h
+ *
+ *  Created on: 2011-6-3
+ *      Author: Tim
+ */
 
-#include <e32base.h>
+#ifndef __TFILEMONITOR_H__
+#define __TFILEMONITOR_H__
 
-enum AttStatus
+#include <f32file.h>
+
+class TFileMonitor : public MFileManObserver
 {
-    not_set = 0,    //not define
-    add_to,         //+
-    rm_it           //-
+public:
+    enum TMonitorMode  {   ENone = -1, ECopy, EDelete  };
+    TFileMonitor(CFileMan& aFileMan);
+
+    void SetMode(TMonitorMode m)    {   mode = m;   }
+    void SetAtt(TUint aSetAttMask, TUint aClearAttMask)
+    {
+        iSetAttMask = aSetAttMask;
+        iClearAttMask = aClearAttMask;
+    }
+public:
+    TControl NotifyFileManStarted();
+    TControl NotifyFileManOperation();
+    TControl NotifyFileManEnded();
+    
+protected:
+    CFileMan& iFileMan;
+    TUint iSetAttMask;
+    TUint iClearAttMask;
+    
+    TMonitorMode mode;
 };
 
-struct Parameter
-{
-    AttStatus s;    //sys attribute
-    AttStatus h;    //hidden
-    AttStatus r;    //read only
-    
-    TBool is;       //include subfolder?
-    TBool ow;       //overwrite exists file?
-    
-    Parameter()
-    {
-        s = h = r = not_set;
-        is = ow = EFalse;
-    }
-    
-    TBool NeedToSetAtt() const{
-        return s + h + r > 0;
-    }
-    
-    Parameter & operator = (const Parameter &other)
-    {
-        this->s = other.s;
-        this->h = other.h;
-        this->r = other.r;
-        this->is = other.is;
-        this->ow = other.ow;
-        
-        return *this;
-    }
-};
-
-#endif  /* __PARAMETER_H__ */
+#endif /* __TFILEMONITOR_H__ */
