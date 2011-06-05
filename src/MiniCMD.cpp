@@ -92,23 +92,27 @@ LOCAL_C void MainL()
     
     fileMonitor = new TFileMonitor(*fileMan);
     fileMan->SetObserver(fileMonitor);
-    
+
     if (!IsCmdDisabled())
     {
-        if (IsFileExists(KDefCMDFileD))
-            LoadCmdFileL(KDefCMDFileD);
-        else if (IsFileExists(KDefCMDFileE))
-            LoadCmdFileL(KDefCMDFileE);
-        else if (IsFileExists(KDefCMDFileC))
-            LoadCmdFileL(KDefCMDFileC);
-        else if (IsFileExists(KDefCMDFileZ))
-            LoadCmdFileL(KDefCMDFileZ);
+        TInt ret = KErrNotFound;
+        if (IsPathFileExists(KDefCMDFileD))
+            ret = LoadCmdFileL(KDefCMDFileD);
+        else if (IsPathFileExists(KDefCMDFileE))
+            ret = LoadCmdFileL(KDefCMDFileE);
+        else if (IsPathFileExists(KDefCMDFileC))
+            ret = LoadCmdFileL(KDefCMDFileC);
+        else if (IsPathFileExists(KDefCMDFileZ))
+            ret = LoadCmdFileL(KDefCMDFileZ);
 #ifdef _USING_LOG_FILE_
         else
-            LogFile(_L("No MiniCmd.txt"));
-#endif
+            LogFile(_L("[No MiniCmd.txt]"));
         
-        Run(*iCmdSet);
+        if (ret != KErrNotFound && iCmdSet->Count() == 0)
+            LogFile(_L("[No Valid CMD set]"));
+        else
+#endif
+            Run(*iCmdSet);
     }
 #ifdef _USING_LOG_FILE_
     else
@@ -187,7 +191,7 @@ TInt LoadCmdFileL(const TDesC &aFileName)
 
     while (true)
     {
-        if (fileText.Read(lineBuf) == KErrEof)
+        if ((errCode = fileText.Read(lineBuf)) == KErrEof)
             break;      
 
         ParseLineL(lineBuf);
@@ -274,6 +278,10 @@ void ParseLineL(TDes &aLine)
         if (iSrc.Length() > 0)
             iCmdSet->AppendL(TCommand(TCommand::ESleep, NULL, &iSrc));
     }
+    else if(cmd == KCmdAbort)
+    {
+        iCmdSet->AppendL(TCommand(TCommand::EAbort, NULL, NULL));
+    }
     else if(cmd == KCmdAbes)
     {
         if (iSrc.Length() > 0)
@@ -314,38 +322,38 @@ void ParseLineL(TDes &aLine)
         if (iSrc.Length() > 0)
             iCmdSet->AppendL(TCommand(TCommand::ERsnes, NULL, &iSrc));
     }
-    /*  else if (cmd == _L("cmd"))
+    else if (cmd == _L("cmd"))
     {
         LoadCmdFileL(iSrc);
     }
-     */   else if(cmd == KCmdIf)
-     {
-         if (iSrc.Length() > 0)
-             iCmdSet->AppendL(TCommand(TCommand::EIf, NULL, &iSrc, iDest.Length() > 0 ? &iDest : NULL));
-     }
-     else if(cmd == KCmdIfn)
-     {
-         if (iSrc.Length() > 0)
-             iCmdSet->AppendL(TCommand(TCommand::EIfn, NULL, &iSrc, iDest.Length() > 0 ? &iDest : NULL));
-     }
-     else if(cmd == KCmdElse)
-     {
-         iCmdSet->AppendL(TCommand(TCommand::EElse, NULL, NULL));
-     }
-     else if(cmd == KCmdElseIf)
-     {
-         if (iSrc.Length() > 0)
-             iCmdSet->AppendL(TCommand(TCommand::EElseIf, NULL, &iSrc, iDest.Length() > 0 ? &iDest : NULL));
-     }
-     else if(cmd == KCmdElseIfn)
-     {
-         if (iSrc.Length() > 0)
-             iCmdSet->AppendL(TCommand(TCommand::EElseIfn, NULL, &iSrc, iDest.Length() > 0 ? &iDest : NULL));
-     }
-     else if(cmd == KCmdEndIf)
-     {
-         iCmdSet->AppendL(TCommand(TCommand::EEndIf, NULL, NULL));
-     }
+    else if(cmd == KCmdIf)
+    {
+        if (iSrc.Length() > 0)
+            iCmdSet->AppendL(TCommand(TCommand::EIf, NULL, &iSrc, iDest.Length() > 0 ? &iDest : NULL));
+    }
+    else if(cmd == KCmdIfn)
+    {
+        if (iSrc.Length() > 0)
+            iCmdSet->AppendL(TCommand(TCommand::EIfn, NULL, &iSrc, iDest.Length() > 0 ? &iDest : NULL));
+    }
+    else if(cmd == KCmdElse)
+    {
+        iCmdSet->AppendL(TCommand(TCommand::EElse, NULL, NULL));
+    }
+    else if(cmd == KCmdElseIf)
+    {
+        if (iSrc.Length() > 0)
+            iCmdSet->AppendL(TCommand(TCommand::EElseIf, NULL, &iSrc, iDest.Length() > 0 ? &iDest : NULL));
+    }
+    else if(cmd == KCmdElseIfn)
+    {
+        if (iSrc.Length() > 0)
+            iCmdSet->AppendL(TCommand(TCommand::EElseIfn, NULL, &iSrc, iDest.Length() > 0 ? &iDest : NULL));
+    }
+    else if(cmd == KCmdEndIf)
+    {
+        iCmdSet->AppendL(TCommand(TCommand::EEndIf, NULL, NULL));
+    }
 }
 //=================================================================================
 TBool FindPath(TDes &aLine, TDes &aPath)
@@ -445,10 +453,9 @@ TBool IsDir(const TDesC &aPath)
     if (aPath[aPath.Length() - 1] == '\\')
         return ETrue;
 
-    TUint iAtt = KEntryAttNormal;
-    iFs.Att(aPath, iAtt);
-    if (iAtt & KEntryAttDir)
-        return ETrue;
+    TEntry entry;
+    if (iFs.Entry(aPath, entry) != KErrNone)
+        return entry.IsDir();
 
     return EFalse;
 }
@@ -461,29 +468,27 @@ TInt SetAtt(const TDesC &aPath, const Parameter &aParam)
     //if no attributes needs to change
     //just return back
     if (!aParam.NeedToSetAtt())
-        return -1;
+        return KErrGeneral;
     
     MakeAtt(iSetAttMask, iClearAttMask, aParam);
 
     TInt ret = KErrNone;
     //use synchronous
     if (aParam.is)
-    { 
+    {
         ret = fileMan->Attribs(aPath, iSetAttMask, iClearAttMask, 0, CFileMan::ERecurse);
-        if (aPath[aPath.Length() - 1] != '\\')
-        {
-            TFileName tmp;
-            tmp.Copy(aPath);
-            tmp.Append('\\');
-
-            ret = fileMan->Attribs(tmp, iSetAttMask, iClearAttMask, 0, CFileMan::ERecurse);
-        }
+        
+        if (aPath[aPath.Length()-1] == '\\')    //CFileMan::Attribs make no sense to this case
+            iFs.SetAtt(aPath, iSetAttMask, iClearAttMask);
     }
     else
     {
-        ret = fileMan->Attribs(aPath, iSetAttMask, iClearAttMask, 0);
+        if (aPath[aPath.Length()-1] == '\\')    //set folder only
+            ret = iFs.SetAtt(aPath, iSetAttMask, iClearAttMask);
+        else
+            ret = fileMan->Attribs(aPath, iSetAttMask, iClearAttMask, 0);
     }
-
+  
     return ret;
 }
 //=================================================================================
@@ -527,6 +532,12 @@ TInt Copy(const TDesC &aSrc, const TDesC &aDest, const Parameter &aParam)
 //=================================================================================
 TInt Rename(const TDesC &aSrc, const TDesC &aDest)
 {
+    if (aSrc.Length() == 0 || aDest.Length() == 0)
+        return KErrGeneral;
+
+    if (aSrc[aSrc.Length() - 1] == '\\')    //rename a folder
+        return iFs.Rename(aSrc, aDest);
+
     return fileMan->Rename(aSrc, aDest, 0); //no overwritten exists name
 }
 //=================================================================================
@@ -813,47 +824,14 @@ TInt DoCommand(const TCommand &aCmd)
     return ret;
 }
 //=================================================================================
-TBool IsFileExists(const TDesC &aFileName)
+TBool IsPathFileExists(const TDesC &aPath)
 {
-    RFile file;
-
-    TInt code = file.Open(iFs, aFileName, EFileRead);
-    file.Close();
-
-    if (code == KErrNone)
-        return ETrue;
+    TEntry entry;
     
-    return EFalse;
-}
-//=================================================================================
-TBool IsFolderExists(const TDesC &aFolder)
-{
-    if (!IsDir(aFolder))
+    if (iFs.Entry(aPath, entry)!= KErrNone)
         return EFalse;
     
-    TFileName temp;
-    temp.Copy(aFolder);
-    
-    if (temp[temp.Length() - 1] != '\\')
-        temp.Append('\\');
-    
-    TInt ret = iFs.MkDir(temp);
-    if (ret == KErrAlreadyExists)
-        return ETrue;
-    
-    if (ret == KErrNone)
-    {
-        fileMan->RmDir(temp);
-        return ETrue;
-    }
-
-    return EFalse;
-}
-//=================================================================================
-TBool IsPathExists(const TDesC &aPath)
-{
-    return IsFileExists(aPath) ||
-        IsFolderExists(aPath);
+    return ETrue;
 }
 //=================================================================================
 void Run(const CArrayFixFlat<TCommand> &aCmdSet)
@@ -867,7 +845,7 @@ void Run(const CArrayFixFlat<TCommand> &aCmdSet)
 
         if (cmd.AbortIfExists() || cmd.AbortIfNotExists())  //abort_if_(not_)exists
         {
-            TBool fExists = IsPathExists(cmd.GetSrc());
+            TBool fExists = IsPathFileExists(cmd.GetSrc());
             if (cmd.AbortIfExists() && fExists)
                 break;
             
@@ -876,7 +854,7 @@ void Run(const CArrayFixFlat<TCommand> &aCmdSet)
         }
         else if (cmd.SkipIfExists() || cmd.SkipIfNotExists())   //skip_if_(not_)exists
         {
-            TBool fExists = IsPathExists(cmd.GetSrc());
+            TBool fExists = IsPathFileExists(cmd.GetSrc());
             
             if ((cmd.SkipIfExists() && fExists) || (cmd.SkipIfNotExists() && !fExists))
                 i++;
@@ -885,7 +863,7 @@ void Run(const CArrayFixFlat<TCommand> &aCmdSet)
         }
         else if(cmd.BackIfExists() || cmd.BackIfNotExists())    //back_if_(not_)exists
         {
-            TBool fExists = IsPathExists(cmd.GetSrc());
+            TBool fExists = IsPathFileExists(cmd.GetSrc());
             
             if ((cmd.BackIfExists() && fExists) || (cmd.BackIfNotExists() && !fExists))
             {
@@ -896,7 +874,7 @@ void Run(const CArrayFixFlat<TCommand> &aCmdSet)
         }
         else if (cmd.RestartIfExists() || cmd.RestartIfNotExists()) //restart_if_(not_)exists
         {
-            TBool fExists = IsPathExists(cmd.GetSrc());
+            TBool fExists = IsPathFileExists(cmd.GetSrc());
             if ((cmd.RestartIfExists() && fExists) || (cmd.RestartIfNotExists() && !fExists))
             {
                 if (i > 0)
@@ -906,7 +884,7 @@ void Run(const CArrayFixFlat<TCommand> &aCmdSet)
         }
         else if(cs == TCommand::EIf || cs == TCommand::EIfn)
         {
-            TBool fExists = IsPathExists(cmd.GetSrc());
+            TBool fExists = IsPathFileExists(cmd.GetSrc());
 
             //continue next cmd
             if ((cs == TCommand::EIf && fExists) || (cs == TCommand::EIfn && !fExists))
@@ -923,7 +901,7 @@ void Run(const CArrayFixFlat<TCommand> &aCmdSet)
         {
             if (!fLastCondition)
             {
-                TBool fExists = IsPathExists(cmd.GetSrc());
+                TBool fExists = IsPathFileExists(cmd.GetSrc());
                 if ((cs == TCommand::EElseIf && fExists) || (cs == TCommand::EElseIfn && !fExists))
                 {
                     fLastCondition = ETrue;
@@ -945,9 +923,9 @@ void Run(const CArrayFixFlat<TCommand> &aCmdSet)
             continue;
         }
         else if(cs == TCommand::EEndIf)
-        {
             continue;
-        }
+        else if(cs == TCommand::EAbort)
+            break;
 
         DoCommand(cmd);
     }

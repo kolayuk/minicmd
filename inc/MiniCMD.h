@@ -44,9 +44,7 @@ TBool   GetCMD(TDes &aLine, TDes &cmd);
 void    ParseCMD(TDes &aCMD, TDes &aSrc, TDes *aDest = NULL, Parameter *aParam = NULL);
 TInt    DoCommand(const TCommand &aCmd);
 TBool   IsCmdDisabled();    //test if usr don't want to run minicmd
-TBool   IsFileExists(const TDesC &aFileName);
-TBool   IsFolderExists(const TDesC &aFolder);
-TBool   IsPathExists(const TDesC &aPath);
+TBool   IsPathFileExists(const TDesC &aPath);
 void    Run(const CArrayFixFlat<TCommand> &aCmdSet);
 void    MakeAtt(TUint &aSet, TUint &aClear, const Parameter &aParam);
 inline  void SkipCmd(const CArrayFixFlat<TCommand> &aCmdSet, TInt &i);

@@ -29,6 +29,7 @@ _LIT(KDefCMDFileZ, "Z:\\Data\\MiniCmd.txt");
 
 _LIT(KDisableFile, "MiniCmd.disable");
 
+_LIT(KCmdAbort,     "abort");
 _LIT(KCmdAtt,       "att");
 _LIT(KCmdCp,        "cp");
 _LIT(KCmdCopy,      "copy");

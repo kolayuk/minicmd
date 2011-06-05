@@ -46,7 +46,7 @@ MFileManObserver::TControl TFileMonitor::NotifyFileManStarted()
         TFileName iSrc;
         iFileMan.GetCurrentSource(iSrc);
         //don't use iFileMan ...
-        iFs.SetAtt(iSrc,  KEntryAttNormal, KEntryAttReadOnly);
+        iFs.SetAtt(iSrc,  KEntryAttNormal, KEntryAttReadOnly | KEntryAttSystem);
     }
     
     return EContinue;

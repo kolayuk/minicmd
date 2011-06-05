@@ -51,6 +51,7 @@ public:
         ERun,       //run app
         EKill,      //kill app
         ESleep,
+        EAbort,     
         EAbes,      //abort if exists
         EAbnes,     //abort if not exists
         ESkes,      //skip if exists
