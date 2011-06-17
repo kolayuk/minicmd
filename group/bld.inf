@@ -4,13 +4,14 @@
  Author	  		: Just Fancy
  Project Home  	: http://code.google.com/p/minicmd/
  Description : This file provides the information required for building the
-				whole of a MiniCMD.
+				whole of a MiniCMD.gnumakefile ../client/group/icons.mk
+				
 ============================================================================
 */
 
-PRJ_PLATFORMS
-DEFAULT
-
 PRJ_MMPFILES
+
 gnumakefile icons.mk
 MiniCMD.mmp
+MiniCMDServer.mmp
+plugin.mmp

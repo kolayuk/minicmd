@@ -1,0 +1,24 @@
+#include <RegistryInfo.rh>
+
+RESOURCE REGISTRY_INFO theInfo
+{
+    dll_uid = 0xE132DCB5;
+    interfaces =
+    {
+        INTERFACE_INFO
+        {
+            interface_uid = 0x101F7F5D;//0x101F7D87;
+            implementations =
+            {
+                IMPLEMENTATION_INFO
+                {
+                    implementation_uid  = 0xE132DCB5;
+                    version_no          = 1;
+                    display_name        = "MiniCMD_Starter";
+                    default_data        = "";
+                    opaque_data         = "";
+                }
+            };
+        }
+    };
+}

@@ -22,25 +22,26 @@
 ============================================================================
 */
 
-TARGET		  MiniCMD.exe
-TARGETTYPE	  EXE
-UID 0x100039CE 0x2132DCB3
+TARGET		MiniCMD.exe
+TARGETTYPE	EXE
+UID 		0x100039CE 0xE132DCB3
 
-USERINCLUDE	 ..\inc
+USERINCLUDE	 ..\client\inc
 SYSTEMINCLUDE   \epoc32\include
 
-SOURCEPATH	..\src
-SOURCE		  MiniCMD.cpp TCommand.cpp TFileMonitor.cpp //MiniLog.cpp
+SOURCEPATH	..\client\src
+SOURCE		  MiniCMD.cpp MiniLog.cpp ServerSession.cpp
 
 LIBRARY	euser.lib
 LIBRARY efsrv.lib
-//LIBRARY estor.lib
+LIBRARY estor.lib
+LIBRARY ws32.lib
+LIBRARY apgrfx.lib
+LIBRARY apparc.lib
+LIBRARY aknnotify.lib
+LIBRARY SWInstCli.lib
 
-SOURCEPATH	..\data
-
-START RESOURCE [2132DCB3].rss
-	TARGETPATH private\101f875a\import
-END
+SOURCEPATH	..\client\data
 
 START RESOURCE MiniCMD.rss
 HEADER
@@ -55,10 +56,9 @@ TARGETPATH 	  \private\10003a3f\import\apps
 #endif
 END
 
-#ifdef ENABLE_ABIV2_MODE
-DEBUGGABLE_UDEBONLY
-#endif
+LANG SC
+VENDORID 0
 
-CAPABILITY AllFiles CommDD DiskAdmin DRM LocalServices Location MultimediaDD NetworkControl NetworkServices PowerMgmt ProtServ ReadDeviceData ReadUserData SurroundingsDD SwEvent TCB TrustedUI UserEnvironment WriteDeviceData WriteUserData
+CAPABILITY All -TCB
 
 EPOCPROCESSPRIORITY foreground
