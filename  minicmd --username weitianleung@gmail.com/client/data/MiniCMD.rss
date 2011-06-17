@@ -1,0 +1,14 @@
+
+#include <appinfo.rh>
+
+RESOURCE LOCALISABLE_APP_INFO r_minicmd_localisable_app_info
+{
+    short_caption = "MiniCMD";
+    caption_and_icon = 
+        CAPTION_AND_ICON_INFO
+        {
+        caption = "MiniCMD";
+        number_of_icons = 1;
+        icon_file = "\\resource\\apps\\MiniCMD.mif";
+        };
+}

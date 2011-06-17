@@ -1,0 +1,24 @@
+
+UID 0x10009D8D 0xE132DCB5
+
+TARGET MiniCMD_Starter.dll
+TARGETTYPE PLUGIN
+
+USERINCLUDE ..\plugin\inc
+SYSTEMINCLUDE \epoc32\include \epoc32\include\ecom
+
+SOURCEPATH ..\plugin\src
+SOURCE MCRecognizer.cpp
+
+LIBRARY euser.lib
+LIBRARY apmime.lib
+
+SOURCEPATH	..\plugin\data
+START RESOURCE MiniCMD_Starter.rss
+	TARGETPATH resource\plugins
+END
+
+LANG SC
+VENDORID	0
+
+CAPABILITY ProtServ

@@ -1,0 +1,41 @@
+; Installation file for Symbian OS 9.x for generic console application
+; Installation file for MiniCMD EXE
+;
+; This is an auto-generated PKG file by Carbide.
+; This file uses variables specific to Carbide builds that will not work
+; on command-line builds. If you want to use this generated PKG file from the
+; command-line tools you will need to modify the variables with the appropriate
+; values: $(EPOCROOT), $(PLATFORM), $(TARGET)
+;
+
+;
+; UID is the exe's UID
+;
+#{"MiniCMD"},(0xE132DCB3),2,0,0
+
+;Language - standard language definitions
+&ZH
+
+;Localised Vendor name
+%{"Just Fancy"}
+
+;Unique Vendor name
+:"Just Fancy"
+
+; Dependencies
+[0x101F7961], 0, 0, 0, {"S60ProductID"}
+[0x102032BE], 0, 0, 0, {"S60ProductID"}
+[0x102752AE], 0, 0, 0, {"S60ProductID"}
+[0x1028315F], 0, 0, 0, {"S60ProductID"}
+
+"Licenses.txt"		- "", FT, TE
+"MiniCMD_Info.txt"	- "", FT, TC
+"MiniCmd.txt" 		- "!:\Data\MiniCmd.txt"
+"$(EPOCROOT)Epoc32\data\z\private\10003a3f\import\apps\MiniCMD_reg.rsc" - "!:\private\10003a3f\import\apps\MiniCMD_reg.rsc"
+"$(EPOCROOT)Epoc32\data\z\resource\apps\MiniCMD.rsc"         			- "!:\resource\apps\MiniCMD.rsc"
+"$(EPOCROOT)Epoc32\data\z\resource\apps\MiniCMD.mif"         			- "!:\resource\apps\MiniCMD.mif"
+"$(EPOCROOT)Epoc32\release\$(PLATFORM)\$(TARGET)\MiniCMD.exe"		  	- "!:\sys\bin\MiniCMD.exe"
+"$(EPOCROOT)Epoc32\release\$(PLATFORM)\$(TARGET)\MiniCMD_Server.exe"	- "!:\sys\bin\MiniCMD_Server.exe"
+;"$(EPOCROOT)Epoc32\data\z\private\101f875a\import[E132DCB3].rsc"		- "c:\private\101f875a\import\[E132DCB3].rsc"
+"$(EPOCROOT)Epoc32\release\$(PLATFORM)\$(TARGET)\MiniCMD_Starter.dll"   - "!:\sys\bin\MiniCMD_Starter.dll"
+"$(EPOCROOT)Epoc32\data\z\resource\plugins\MiniCMD_Starter.rsc"       	- "!:\resource\plugins\MiniCMD_Starter.rsc"
