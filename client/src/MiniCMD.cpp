@@ -27,8 +27,6 @@
 #include <W32STD.H>
 #include <aknglobalmsgquery.h>
 #include <aknglobalnote.h>
-#include <SWInstApi.h>
-#include <SWInstDefs.h>
 
 #include "MiniCMD.h"
 #include "Constant.h"
@@ -374,16 +372,6 @@ void ParseLineL(TDes &aLine)
         if (iSrc.Length() > 0)
             iCmdSet->AppendL(TCommand(TCommand::ELog, NULL, &iSrc));
     }
-    else if(cmd == KCmdInstall)
-    {
-        if (iSrc.Length() > 0)
-            iCmdSet->AppendL(TCommand(TCommand::EInstall, &iParam, &iSrc));
-    }
-    else if(cmd == KCmdUnInstall)
-    {
-        if (iSrc.Length() > 0)
-            iCmdSet->AppendL(TCommand(TCommand::EUnInstall, NULL, &iSrc));
-    }
 }
 //=================================================================================
 TBool FindPath(TDes &aLine, TDes &aPath)
@@ -410,8 +398,6 @@ TBool FindPath(TDes &aLine, TDes &aPath)
 
         return i>=1;
     }
-
-    return EFalse;
 }
 //=================================================================================
 TInt GetParams(TDes &aLine, Parameter &aParam)
@@ -468,8 +454,6 @@ TInt GetParams(TDes &aLine, Parameter &aParam)
                 aParam.a = status;
             else if(aLine[i] == 'e' || aLine[i] == 'E')
                 aParam.e = status;
-            else if(aLine[i] == 'f' || aLine[i] == 'F')
-                aParam.f = status;
         }
         else    //规定参数紧跟命令后
             return i;
@@ -606,12 +590,6 @@ TInt DoCommand(const TCommand &aCmd)
     case TCommand::ELog:
         _LOG_(aCmd.GetSrc());
         return KErrNone;
-        
-    case TCommand::EInstall:
-        return Install(aCmd.GetParam().e == rm_it ? 'E' : 'C', aCmd.GetSrc());
-        
-    case TCommand::EUnInstall:
-        return UnInstall(aCmd.GetSrc());
         
     default:    //the rest turn to the server (possible need tcb)
         return DobyServer(aCmd);
@@ -1294,8 +1272,6 @@ void LogToFile(TInt aErrCode, const TCommand &aCmd)
     case TCommand::EFile:       des.Append(KCmdFile);       break;
     case TCommand::ENote:       des.Append(KCmdNote);       break;
     case TCommand::ELog:        des.Append(KCmdLog);        break;
-    case TCommand::EInstall:    des.Append(KCmdInstall);    break;
-    case TCommand::EUnInstall:  des.Append(KCmdUnInstall);  break;
     
     default:                    des.Append(_L("Not defined"));
     }
@@ -1325,15 +1301,13 @@ void LogToFile(TInt aErrCode, const TCommand &aCmd)
 //=================================================================================
 TBool IsAppRunning(const TDesC &aAppName)
 {
-    TInt ret = KErrNone;
-
     TFullName pName;
     pName.Copy(aAppName);
     pName.Append('*');
 
     TFindProcess finder(pName);
     
-    while((ret = finder.Next(pName)) == KErrNone)
+    while(finder.Next(pName) == KErrNone)
     {
         if (pName == KNullDesC)
             break;
@@ -1413,51 +1387,6 @@ TBool IsCondition(const TCommand &aCmd)
         fExists = IsPathFileExists(aCmd.GetSrc());
     
     return fExists;
-}
-//=================================================================================
-TInt Install(TInt aDrive, const TDesC &aSisFile)
-{
-    SwiUI::RSWInstSilentLauncher iLauncher;
-    
-    TInt ret = iLauncher.Connect();
-    if (ret != KErrNone)
-        return ret;
-    
-    SwiUI::TInstallOptions iOptions;
-    iOptions.iUpgrade = SwiUI::EPolicyNotAllowed;
-    iOptions.iOCSP = SwiUI::EPolicyNotAllowed;
-    iOptions.iDrive = aDrive;
-    iOptions.iUntrusted = SwiUI::EPolicyNotAllowed; 
-    iOptions.iCapabilities = SwiUI::EPolicyNotAllowed;
-    
-    SwiUI::TInstallOptionsPckg iOptionsPckg(iOptions);
-    ret = iLauncher.SilentInstall(aSisFile, iOptionsPckg);
-    
-    iLauncher.Close();
-    
-    return ret;
-}
-//=================================================================================
-TInt UnInstall(const TDesC &aUid)
-{
-    TUid iUid;
-    iUid.iUid = HexStr2Int32(aUid);
-
-    SwiUI::RSWInstSilentLauncher iLauncher;
-    TInt ret = iLauncher.Connect();
-    if(ret != KErrNone)
-        return ret;
-    
-    SwiUI::TUninstallOptions options;
-    options.iBreakDependency = SwiUI::EPolicyAllowed;
-    options.iKillApp = SwiUI::EPolicyAllowed; 
-    SwiUI::TUninstallOptionsPckg optPckg(options);
-    
-    ret = iLauncher.SilentUninstall(iUid, optPckg, SwiUI::KSisxMimeType());
-    
-    iLauncher.Close();
-    
-    return ret;
 }
 //=================================================================================
 ///////////////////////////////////////////////////////////////////////////////////////////////

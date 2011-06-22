@@ -87,9 +87,6 @@ TBool   TestAppRunning(const TDesC &aApp);
 inline  TBool IsHexString(const TDesC &aStr); //len >= 3 && begin with '0x' or '0X'
 
 inline  TBool IsCondition(const TCommand &aCmd);
-
-TInt    Install(TInt aDrive, const TDesC &aSisFile);
-TInt    UnInstall(const TDesC &aUid);
 //=================================================================================
 #endif  // __MINI_CMD_H__
 //=================================================================================

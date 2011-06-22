@@ -61,7 +61,9 @@ CMiniLog* CMiniLog::NewL(RFs &aFs, const TDesC &aFile)
 void CMiniLog::ConstructL(RFs &aFs, const TDesC &aFile)
 {
     iFs = &aFs;
- 
+    
+    aFs.MkDirAll(aFile);    //Fixed: when target dir does not exists, Create failed
+                            //Jun. 22, 2011   
     if (iFile.Open(*iFs, aFile, EFileWrite) == KErrNotFound)
     {
         User::LeaveIfError(iFile.Create(*iFs, aFile, EFileWrite));

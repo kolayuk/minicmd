@@ -48,11 +48,9 @@ struct Parameter
     
     AttStatus e;    //last error status
     
-    AttStatus f;    //force copy
-    
     Parameter()
     {
-        s = h = r = c = a = e = f = not_set;
+        s = h = r = c = a = e = not_set;
         is = ow = EFalse;
     }
     
@@ -70,7 +68,6 @@ struct Parameter
         this->c = other.c;
         this->a = other.a;
         this->e = other.e;
-        this->f = other.f;
         
         return *this;
     }

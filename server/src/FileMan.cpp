@@ -1,3 +1,26 @@
+/*
+ ============================================================================
+ Name           : MiniCMD
+ Author         : Just Fancy
+ Project Home   : http://code.google.com/p/minicmd/
+ ============================================================================
+    MiniCMD, mini commander for Symbian OS phone
+    Copyright (C) 2011  Just Fancy
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ============================================================================
+ */
 //=================================================================================
 #include "FileMan.h"
 #include "TFileMonitor.h"
@@ -230,60 +253,6 @@ TInt CreateFile(const TDesC &aFileName)
     file.Close();
     return ret;
 }
-//=================================================================================
-
-//TInt CopyF(const TDesC &aSrc, const TDesC &aDest, TBool aOverwiritten/* = EFalse*/)
-/*{
-    TEntry entry;
-    if (!aOverwiritten && iFs.Entry(aDest, entry) == KErrNone)  //file exists
-        return KErrAlreadyExists;
-    
-    RFile file;
-    TFileName fileName;
-    fileName.Copy(aDest);
-    TParse parse;
-    iFs.Parse(aSrc, parse);
-    
-    if (fileName[fileName.Length()-1] == '\\')
-        fileName.Append(parse.Name());
-    
-    MkDir(aDest);
-
-    TInt ret = file.Replace(iFs, fileName, EFileWrite);
-    if (ret != KErrNone)
-        return ret;
-    
-    TInt pos = 0;
-    HBufC8 *fileBuf = HBufC8::NewLC(256);
-    TPtr8 ptr = fileBuf->Des();
-    
-    while(ETrue)
-    {
-        ret = iFs.ReadFileSection(aSrc, pos, ptr, 256);
-
-        if (ret == KErrNone)
-        {
-            ret = file.Write(ptr);
-            if (ret != KErrNone)
-                break;
-            ret = file.Flush();
-            if (ret != KErrNone)
-                break;
-        } 
-        else
-            break;
-        
-        pos += 256;
-    }
-    
-    CleanupStack::PopAndDestroy(fileBuf);
-    file.Close();
-    
-    if (ret == KErrEof)
-        ret = KErrNone;
-    
-    return ret;
-}*/
 //=================================================================================
 ///////////////////////////////////////////////////////////////////////////////////
 //END OF FILE

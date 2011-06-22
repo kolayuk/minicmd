@@ -66,5 +66,3 @@ _LIT(KCmdSendKey,   "sendkey");
 _LIT(KCmdFile,      "file");
 _LIT(KCmdNote,      "note");
 _LIT(KCmdLog,       "log");
-_LIT(KCmdInstall,   "install");
-_LIT(KCmdUnInstall, "uninstall");

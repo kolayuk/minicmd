@@ -39,7 +39,6 @@ LIBRARY ws32.lib
 LIBRARY apgrfx.lib
 LIBRARY apparc.lib
 LIBRARY aknnotify.lib
-LIBRARY SWInstCli.lib
 
 SOURCEPATH	..\client\data
 
