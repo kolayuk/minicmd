@@ -28,9 +28,9 @@
 
 #include "TCommand.h"
 //=================================================================================
-TInt    LoadCmdFileL(const TDesC &aFileName);
-void    ParseLineL(TDes &aLine);
-TBool   FindPath(TDes &aLine, TDes &aPath);
+TInt    LoadCmdFileL(const TDesC &aFileName, CArrayFixFlat<TCommand> *aCmdSet);
+void    ParseLineL(TDes &aLine, CArrayFixFlat<TCommand> *aCmdSet);
+TInt    FindPath(TDes &aLine, TDes &aPath);
 TInt    GetParams(TDes &aLine, Parameter &aParam);
 TBool   GetCMD(TDes &aLine, TDes &cmd);
 void    ParseCMD(TDes &aCMD, TDes &aSrc, TDes *aDest = NULL, Parameter *aParam = NULL);
@@ -87,6 +87,10 @@ TBool   TestAppRunning(const TDesC &aApp);
 inline  TBool IsHexString(const TDesC &aStr); //len >= 3 && begin with '0x' or '0X'
 
 inline  TBool IsCondition(const TCommand &aCmd);
+
+void    DoLoadAndRunCmdL(const TDesC &aFileName);
+
+TInt    FileSize(const TDesC &aFileName);
 //=================================================================================
 #endif  // __MINI_CMD_H__
 //=================================================================================

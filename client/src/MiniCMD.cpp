@@ -34,12 +34,12 @@
 #include "ServerSession.h"
 //=================================================================================
 RFs iFs;
-CArrayFixFlat<TCommand> *iCmdSet = NULL;
 CMiniLog *miniLog = NULL;
 RServerSession iServer;
 
-TBool iLogAll = EFalse; // whether log all conditions
-TInt  iLastErr = KErrNone;
+TBool iLogAll   = EFalse;   // whether log all conditions
+TInt  iLastErr  = KErrNone;
+TBool iStop     = EFalse;   // stop minicmd 
 //=================================================================================
 #define _LOG_(what) \
     if(miniLog)     \
@@ -51,7 +51,7 @@ TInt  iLastErr = KErrNone;
 //=================================================================================
 LOCAL_C void MainL()
 {  
-    iCmdSet = new(ELeave) CArrayFixFlat<TCommand>(10);
+    CArrayFixFlat<TCommand> *iCmdSet = new(ELeave) CArrayFixFlat<TCommand>(10);
     if (!iCmdSet)
     {
         CleanupStack::PopAndDestroy();
@@ -67,13 +67,13 @@ LOCAL_C void MainL()
     {
         TInt ret = KErrNotFound;
         if (IsPathFileExists(KDefCMDFileD))
-            ret = LoadCmdFileL(KDefCMDFileD);
+            ret = LoadCmdFileL(KDefCMDFileD, iCmdSet);
         else if (IsPathFileExists(KDefCMDFileE))
-            ret = LoadCmdFileL(KDefCMDFileE);
+            ret = LoadCmdFileL(KDefCMDFileE, iCmdSet);
         else if (IsPathFileExists(KDefCMDFileC))
-            ret = LoadCmdFileL(KDefCMDFileC);
+            ret = LoadCmdFileL(KDefCMDFileC, iCmdSet);
         else if (IsPathFileExists(KDefCMDFileZ))
-            ret = LoadCmdFileL(KDefCMDFileZ);
+            ret = LoadCmdFileL(KDefCMDFileZ, iCmdSet);
         else
             _LOG_(_L("[No MiniCmd.txt]"));
         
@@ -89,7 +89,7 @@ LOCAL_C void MainL()
     else
         _LOG_(_L("[MiniCMD disabled]"));
     
-    _LOG_(_L("[Exiting MiniCMD normally]"));
+    _LOG_(_L("[Exiting MiniCMD normally]\r\n"));
     
     CleanupStack::PopAndDestroy(iCmdSet);
 
@@ -142,7 +142,7 @@ GLDEF_C TInt E32Main()
     if (miniLog)
     {
         if (iErr != KErrNone)
-            miniLog->Log(_L("[Main::TRAP] [%d]"), iErr);
+            miniLog->Log(_L("[Main::TRAP] [%d]\r\n"), iErr);
         
         delete miniLog;
     }
@@ -154,7 +154,7 @@ GLDEF_C TInt E32Main()
     return KErrNone;
 }
 //=================================================================================
-TInt LoadCmdFileL(const TDesC &aFileName)
+TInt LoadCmdFileL(const TDesC &aFileName, CArrayFixFlat<TCommand> *aCmdSet)
 {
     RFile file;
     TInt errCode = KErrNone;
@@ -192,7 +192,7 @@ TInt LoadCmdFileL(const TDesC &aFileName)
         if ((errCode = fileText.Read(lineBuf)) == KErrEof)
             break;      
 
-        ParseLineL(lineBuf);
+        ParseLineL(lineBuf, aCmdSet);
     }
 
     CleanupStack::PopAndDestroy(heapBuf);
@@ -204,7 +204,7 @@ TInt LoadCmdFileL(const TDesC &aFileName)
     return errCode;
 }
 //=================================================================================
-void ParseLineL(TDes &aLine)
+void ParseLineL(TDes &aLine, CArrayFixFlat<TCommand> *aCmdSet)
 {
     TBuf<24> cmd;
 
@@ -227,177 +227,218 @@ void ParseLineL(TDes &aLine)
     if (cmd == KCmdAtt)
     {    
         if (iParam.NeedToSetAtt() && iSrc.Length() > 0)
-            iCmdSet->AppendL(TCommand(TCommand::EAtt, &iParam, &iSrc));
+            aCmdSet->AppendL(TCommand(TCommand::EAtt, &iParam, &iSrc));
     }
     else if(cmd == KCmdCp || cmd == KCmdCopy)
     {
         if (iDest.Length() > 0)
-            iCmdSet->AppendL(TCommand(TCommand::ECp, &iParam, &iSrc, &iDest));
+            aCmdSet->AppendL(TCommand(TCommand::ECp, &iParam, &iSrc, &iDest));
     }
     else if(cmd == KCmdMv)
     {
         if (iDest.Length() > 0  && iSrc.Length() > 0)
-            iCmdSet->AppendL(TCommand(TCommand::EMv, &iParam, &iSrc, &iDest));
+            aCmdSet->AppendL(TCommand(TCommand::EMv, &iParam, &iSrc, &iDest));
     }
     else if(cmd == KCmdMd || cmd == KCmdMkDir)
     {
         if (iSrc.Length() > 0 && iSrc[iSrc.Length() - 1] != '\\')
             iSrc.Append('\\');
 
-        iCmdSet->AppendL(TCommand(TCommand::EMd, NULL, &iSrc));
+        aCmdSet->AppendL(TCommand(TCommand::EMd, NULL, &iSrc));
     }
     else if(cmd == KCmdRn || cmd == KCmdRename)
     {
         if (iSrc.Length() > 0 && iDest.Length() > 0)
-            iCmdSet->AppendL(TCommand(TCommand::ERn, NULL, &iSrc, &iDest));
+            aCmdSet->AppendL(TCommand(TCommand::ERn, NULL, &iSrc, &iDest));
     }
     else if(cmd == KCmdRm || cmd == KCmdRmDir)
     {
         if (iSrc.Length() > 0)
-            iCmdSet->AppendL(TCommand(TCommand::ERm, &iParam, &iSrc));
+            aCmdSet->AppendL(TCommand(TCommand::ERm, &iParam, &iSrc));
     }
     else if (cmd == KCmdDel)
     {
         if (iSrc.Length() > 0)
-            iCmdSet->AppendL(TCommand(TCommand::EDel, &iParam, &iSrc));
+            aCmdSet->AppendL(TCommand(TCommand::EDel, &iParam, &iSrc));
     }
     else if (cmd == KCmdRun)
     {
         if (iSrc.Length() > 0)
-            iCmdSet->AppendL(TCommand(TCommand::ERun, &iParam, &iSrc));
+            aCmdSet->AppendL(TCommand(TCommand::ERun, &iParam, &iSrc));
     }
     else if(cmd == KCmdKill)
     {
         if (iSrc.Length() > 0)
-            iCmdSet->AppendL(TCommand(TCommand::EKill, NULL, &iSrc));
+            aCmdSet->AppendL(TCommand(TCommand::EKill, NULL, &iSrc));
     }
     else if(cmd == KCmdSleep)
     {
         if (iSrc.Length() > 0)
-            iCmdSet->AppendL(TCommand(TCommand::ESleep, NULL, &iSrc));
+            aCmdSet->AppendL(TCommand(TCommand::ESleep, NULL, &iSrc));
     }
     else if(cmd == KCmdAbort)
     {
-        iCmdSet->AppendL(TCommand(TCommand::EAbort, NULL, NULL));
+        aCmdSet->AppendL(TCommand(TCommand::EAbort, NULL, NULL));
     }
     else if(cmd == KCmdAbes)
     {
         if (iSrc.Length() > 0)
-            iCmdSet->AppendL(TCommand(TCommand::EAbes, &iParam, &iSrc));
+            aCmdSet->AppendL(TCommand(TCommand::EAbes, &iParam, &iSrc));
     }
     else if(cmd == KCmdAbnes)
     {
         if (iSrc.Length() > 0)
-            iCmdSet->AppendL(TCommand(TCommand::EAbnes, &iParam, &iSrc));
+            aCmdSet->AppendL(TCommand(TCommand::EAbnes, &iParam, &iSrc));
     }
     else if(cmd == KCmdSkes)
     {
         if (iSrc.Length() > 0)
-            iCmdSet->AppendL(TCommand(TCommand::ESkes, &iParam, &iSrc));
+            aCmdSet->AppendL(TCommand(TCommand::ESkes, &iParam, &iSrc));
     }
     else if(cmd == KCmdSknes)
     {
         if (iSrc.Length() > 0)
-            iCmdSet->AppendL(TCommand(TCommand::ESknes, &iParam, &iSrc));
+            aCmdSet->AppendL(TCommand(TCommand::ESknes, &iParam, &iSrc));
     }
     else if(cmd == KCmdBkes)
     {
         if (iSrc.Length() > 0)
-            iCmdSet->AppendL(TCommand(TCommand::EBkes, &iParam, &iSrc));
+            aCmdSet->AppendL(TCommand(TCommand::EBkes, &iParam, &iSrc));
     }
     else if(cmd == KCmdBknes)
     {
         if (iSrc.Length() > 0)
-            iCmdSet->AppendL(TCommand(TCommand::EBknes, &iParam, &iSrc));
+            aCmdSet->AppendL(TCommand(TCommand::EBknes, &iParam, &iSrc));
     }
     else if(cmd == KCmdRses)
     {
         if (iSrc.Length() > 0)
-            iCmdSet->AppendL(TCommand(TCommand::ERses, &iParam, &iSrc));
+            aCmdSet->AppendL(TCommand(TCommand::ERses, &iParam, &iSrc));
     }
     else if(cmd == KCmdRsnes)
     {
         if (iSrc.Length() > 0)
-            iCmdSet->AppendL(TCommand(TCommand::ERsnes, &iParam, &iSrc));
+            aCmdSet->AppendL(TCommand(TCommand::ERsnes, &iParam, &iSrc));
     }
     else if (cmd == KCmdCmd)
     {
-        LoadCmdFileL(iSrc);
+        // LoadCmdFileL(iSrc);
+        // Jul. 19, 2011
+        // Change to dynamic load
+        
+        if (iSrc.Length() > 0)
+            aCmdSet->AppendL(TCommand(TCommand::ECmd, NULL, &iSrc));
     }
     else if(cmd == KCmdIf)
     {
-        iCmdSet->AppendL(TCommand(TCommand::EIf, &iParam, &iSrc));
+        aCmdSet->AppendL(TCommand(TCommand::EIf, &iParam, &iSrc, &iDest));
     }
     else if(cmd == KCmdIfn)
     {
-        iCmdSet->AppendL(TCommand(TCommand::EIfn, &iParam, &iSrc));
+        aCmdSet->AppendL(TCommand(TCommand::EIfn, &iParam, &iSrc, &iDest));
     }
     else if(cmd == KCmdElse)
     {
-        iCmdSet->AppendL(TCommand(TCommand::EElse, NULL, NULL));
+        aCmdSet->AppendL(TCommand(TCommand::EElse, NULL, NULL));
     }
     else if(cmd == KCmdElseIf)
     {
-        iCmdSet->AppendL(TCommand(TCommand::EElseIf, &iParam, &iSrc));
+        aCmdSet->AppendL(TCommand(TCommand::EElseIf, &iParam, &iSrc, &iDest));
     }
     else if(cmd == KCmdElseIfn)
     {
-        iCmdSet->AppendL(TCommand(TCommand::EElseIfn, &iParam, &iSrc));
+        aCmdSet->AppendL(TCommand(TCommand::EElseIfn, &iParam, &iSrc, &iDest));
     }
     else if(cmd == KCmdEndIf)
     {
-        iCmdSet->AppendL(TCommand(TCommand::EEndIf, NULL, NULL));
+        aCmdSet->AppendL(TCommand(TCommand::EEndIf, NULL, NULL));
     }
     else if(cmd == KCmdKey)
     {
         if (iSrc.Length() > 0)
-            iCmdSet->AppendL(TCommand(TCommand::EKey, &iParam, &iSrc, iDest.Length() > 0 ? &iDest : NULL));
+            aCmdSet->AppendL(TCommand(TCommand::EKey, &iParam, &iSrc, iDest.Length() > 0 ? &iDest : NULL));
     }
     else if(cmd == KCmdSendKey)
     {
         if (iSrc.Length() > 0)
-            iCmdSet->AppendL(TCommand(TCommand::ESendKey, &iParam, &iSrc, iDest.Length() > 0 ? &iDest : NULL));
+            aCmdSet->AppendL(TCommand(TCommand::ESendKey, &iParam, &iSrc, iDest.Length() > 0 ? &iDest : NULL));
     }
     else if(cmd == KCmdFile)
     {
         if (iSrc.Length() > 0)
-            iCmdSet->AppendL(TCommand(TCommand::EFile, &iParam, &iSrc));
+            aCmdSet->AppendL(TCommand(TCommand::EFile, &iParam, &iSrc));
     }
     else if(cmd == KCmdNote)
     {
-        iCmdSet->AppendL(TCommand(TCommand::ENote, &iParam, &iSrc, &iDest));
+        if (iSrc.Length() > 0)
+        {
+            if (iParam.c == rm_it)
+                aCmdSet->AppendL(TCommand(TCommand::ENote, &iParam, &iSrc, &iDest));
+            else
+                aCmdSet->AppendL(TCommand(TCommand::ENote, NULL, &iSrc));
+        }
     }
     else if(cmd == KCmdLog)
     {
         if (iSrc.Length() > 0)
-            iCmdSet->AppendL(TCommand(TCommand::ELog, NULL, &iSrc));
+            aCmdSet->AppendL(TCommand(TCommand::ELog, NULL, &iSrc));
+    }
+    else if(cmd == KCmdStop)
+    {
+        aCmdSet->AppendL(TCommand(TCommand::EStop, NULL, NULL));
     }
 }
 //=================================================================================
-TBool FindPath(TDes &aLine, TDes &aPath)
+TInt FindPath(TDes &aLine, TDes &aPath)
 {
     aLine.TrimLeft();
 
     if (aLine.Length() == 0)
-        return EFalse;
+        return 0;
 
     if(aLine[0] == '"') //以引号开始的
     {
         int i=0;
         while(++i<aLine.Length() && aLine[i] != '"')
-            aPath.Append(aLine[i]);
+        {
+            // \" ==> "
+            // Added - Jul. 19, 2011
+            if (aLine[i] == '\\' && i+1 < aLine.Length() &&
+                aLine[i + 1] == '"')
+            {
+                i++;
+                aPath.Append(aLine[i]);
+            }
+            else
+            {
+                aPath.Append(aLine[i]);
+            }
+        }
 
-        return i>=1;
+        return i;
     }
     else
     {
         int i=-1;
 
         while(++i<aLine.Length() && aLine[i] != ' ')    //以空格结束
-            aPath.Append(aLine[i]);
+        {
+            if (aLine[i] == '\\' && i+1 < aLine.Length() &&
+                 aLine[i + 1] == '"')
+             {
+                 i++;
+                 aPath.Append(aLine[i]);
+             }
+             else
+             {
+                 aPath.Append(aLine[i]);
+             }
+        }
 
-        return i>=1;
+        return i;
     }
+    
+    return 0;
 }
 //=================================================================================
 TInt GetParams(TDes &aLine, Parameter &aParam)
@@ -489,7 +530,7 @@ TBool GetCMD(TDes &aLine, TDes &cmd)
         return EFalse;
 
     //comment line
-    if (aLine[0] == ';' || aLine[0] == '#')
+    if (aLine[0] == ';' || aLine[0] == '#' || aLine[0] == '[')
         return EFalse;
 
     TInt posSpace = aLine.Locate(' ');
@@ -526,18 +567,19 @@ void ParseCMD(TDes &aCMD, TDes &aSrc, TDes *aDest/* = NULL*/, Parameter *aParam/
     }
 
     //then source path
-    if (!FindPath(aCMD, aSrc))
+    TInt iLen = FindPath(aCMD, aSrc);
+    if (iLen == 0)
         return ;
 
     if (aDest != NULL)
     {
-        if (aSrc.Length() < 0)
-            return ;
+//        if (aSrc.Length() < 0)
+//            return ;
         //Important to +2 when the first path enclosed by quote
         if (aCMD[0] == '"')
-            aCMD.Delete(0, aSrc.Length() + 2);
+            aCMD.Delete(0, /*aSrc.Length()*/iLen + 2);
         else
-            aCMD.Delete(0, aSrc.Length());
+            aCMD.Delete(0, /*aSrc.Length()*/iLen);
 
         aCMD.TrimLeft();
         FindPath(aCMD, *aDest);
@@ -591,6 +633,14 @@ TInt DoCommand(const TCommand &aCmd)
         _LOG_(aCmd.GetSrc());
         return KErrNone;
         
+    case TCommand::ECmd:
+    {
+        // to make log cmd first
+        LogToFile(0, aCmd);
+        TRAPD(iErr, DoLoadAndRunCmdL(aCmd.GetSrc()));
+        return iErr;
+    } 
+        
     default:    //the rest turn to the server (possible need tcb)
         return DobyServer(aCmd);
     }
@@ -612,6 +662,9 @@ void Run(const CArrayFixFlat<TCommand> &aCmdSet)
 
     for(TInt i=0; i<aCmdSet.Count(); i++)
     {
+        if (iStop)
+            break;
+        
         TCommand cmd = aCmdSet.operator [](i);
         TCommand::TCommandSet cs = cmd.GetCommand();
 
@@ -629,7 +682,22 @@ void Run(const CArrayFixFlat<TCommand> &aCmdSet)
             TBool fExists = IsCondition(cmd);
             
             if ((cmd.SkipIfExists() && fExists) || (cmd.SkipIfNotExists() && !fExists))
+            {
                 i++;
+                
+                // if the next cmd is if(n)
+                // then should skip this part
+                if (i < aCmdSet.Count() && (
+                    aCmdSet[i].GetCommand() == TCommand::EIf ||
+                    aCmdSet[i].GetCommand() == TCommand::EIfn))
+                {
+                    for(; i<aCmdSet.Count(); i++)
+                    {
+                        if (aCmdSet[i].GetCommand() == TCommand::EEndIf)
+                            break;
+                    }
+                }
+            }
 
             continue;
         }
@@ -640,7 +708,22 @@ void Run(const CArrayFixFlat<TCommand> &aCmdSet)
             if ((cmd.BackIfExists() && fExists) || (cmd.BackIfNotExists() && !fExists))
             {
                 if (i > 0)  //should not be the first cmd,
+                {
                     i -= 2;
+                    
+                    if (aCmdSet[i].GetCommand() == TCommand::EEndIf)
+                    {
+                        for(; i >= 0; i--)
+                         {
+                             if (aCmdSet[i].GetCommand() == TCommand::EIf ||
+                                 aCmdSet[i].GetCommand() == TCommand::EIfn)
+                             {
+                                 i--;
+                                 break;
+                             }
+                         }
+                    }
+                }
             }
             continue;
         }
@@ -696,11 +779,21 @@ void Run(const CArrayFixFlat<TCommand> &aCmdSet)
         else if(cs == TCommand::EEndIf)
             continue;
         else if(cs == TCommand::EAbort)
+        {
+            _LOG_(_L("[Abort]"));
             break;
+        }
+        else if (cs == TCommand::EStop)
+        {
+            _LOG_(_L("[Stop]"));
+            iStop = ETrue;
+            break;
+        }
 
         iLastErr = DoCommand(cmd);
         
-        if (miniLog)
+        // do not log cmd here
+        if (miniLog && cmd.GetCommand() != TCommand::ECmd)
             LogToFile(iLastErr, cmd);
     }
 }
@@ -1272,6 +1365,7 @@ void LogToFile(TInt aErrCode, const TCommand &aCmd)
     case TCommand::EFile:       des.Append(KCmdFile);       break;
     case TCommand::ENote:       des.Append(KCmdNote);       break;
     case TCommand::ELog:        des.Append(KCmdLog);        break;
+    case TCommand::ECmd:        des.Append(KCmdCmd);        break;
     
     default:                    des.Append(_L("Not defined"));
     }
@@ -1383,12 +1477,35 @@ TBool IsCondition(const TCommand &aCmd)
         fExists = TestAppRunning(aCmd.GetSrc());
     else if(aCmd.GetParam().e == rm_it)
         return iLastErr != KErrNone;
+    else if(aCmd.GetParam().s == rm_it)
+        return FileSize(aCmd.GetSrc()) == FileSize(aCmd.GetDst());
     else
         fExists = IsPathFileExists(aCmd.GetSrc());
     
     return fExists;
 }
 //=================================================================================
+void DoLoadAndRunCmdL(const TDesC &aFileName)
+{
+    CArrayFixFlat<TCommand> *iCmdSet = new(ELeave) CArrayFixFlat<TCommand>(5);
+    CleanupStack::PushL(iCmdSet);
+    
+    if (LoadCmdFileL(aFileName, iCmdSet) == KErrNone)
+    {
+        Run(*iCmdSet);
+    }
+    
+    CleanupStack::PopAndDestroy(iCmdSet);
+}
+///////////////////////////////////////////////////////////////////////////////////////////////
+TInt FileSize(const TDesC &aFileName)
+{
+    TEntry entry;
+    TInt err = iFs.Entry(aFileName, entry);
+    if (err == KErrNone)
+        return entry.iSize;
+    return err;
+}
 ///////////////////////////////////////////////////////////////////////////////////////////////
 //END OF FILE
 ///////////////////////////////////////////////////////////////////////////////////////////////

@@ -70,7 +70,9 @@ public:
         ESendKey,
         EFile,
         ENote,
-        ELog
+        ELog,
+        ECmd,
+        EStop
     };
     
     TCommand() : iCmd(ENone){}
