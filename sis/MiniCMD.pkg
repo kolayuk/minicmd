@@ -11,7 +11,7 @@
 ;
 ; UID is the exe's UID
 ;
-#{"MiniCMD"},(0xE132DCB3),2,0,1
+#{"MiniCMD"},(0xE132DCB3),2,0,2
 
 ;Language - standard language definitions
 &ZH

@@ -249,6 +249,10 @@ TInt Move(const TDesC &aSrc, const TDesC &aDest, const Parameter &aParam)
 TInt CreateFile(const TDesC &aFileName)
 {
     RFile file;
+    // Fiexed: when the target directory does not exists
+    // CreateFile failed
+    // Jul. 27, 2011
+    iFs.MkDirAll(aFileName);
     TInt ret = file.Create(iFs, aFileName, EFileWrite);
     file.Close();
     return ret;

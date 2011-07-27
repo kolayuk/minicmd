@@ -31,7 +31,7 @@ _LIT(KMCServerSemaphoreName, "MCServerSemaphore" );
 
 const TUint KMCServMajorVersionNumber = 2;
 const TUint KMCServMinorVersionNumber = 0;
-const TUint KMCServBuildVersionNumber = 0;
+const TUint KMCServBuildVersionNumber = 1;
 
 enum TMCServRqst
 {

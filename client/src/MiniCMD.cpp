@@ -61,7 +61,9 @@ LOCAL_C void MainL()
 
     _LOG_(_L("[Starting MiniCMD]"));
     
-    iServer.Connect();
+    TInt ret = iServer.Connect();
+    if (ret != KErrNone && miniLog != NULL)
+        miniLog->Log(_L("[Start Server Failed] [%d]"), ret);
     
     if (!IsCmdDisabled())
     {
@@ -403,13 +405,14 @@ TInt FindPath(TDes &aLine, TDes &aPath)
         {
             // \" ==> "
             // Added - Jul. 19, 2011
-            if (aLine[i] == '\\' && i+1 < aLine.Length() &&
+            // Removed - Jul. 27, 2011
+            /*if (aLine[i] == '\\' && i+1 < aLine.Length() &&
                 aLine[i + 1] == '"')
             {
                 i++;
                 aPath.Append(aLine[i]);
             }
-            else
+            else*/
             {
                 aPath.Append(aLine[i]);
             }
@@ -423,13 +426,13 @@ TInt FindPath(TDes &aLine, TDes &aPath)
 
         while(++i<aLine.Length() && aLine[i] != ' ')    //以空格结束
         {
-            if (aLine[i] == '\\' && i+1 < aLine.Length() &&
+            /*if (aLine[i] == '\\' && i+1 < aLine.Length() &&
                  aLine[i + 1] == '"')
              {
                  i++;
                  aPath.Append(aLine[i]);
              }
-             else
+             else*/
              {
                  aPath.Append(aLine[i]);
              }
