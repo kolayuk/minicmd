@@ -91,6 +91,12 @@ inline  TBool IsCondition(const TCommand &aCmd);
 void    DoLoadAndRunCmdL(const TDesC &aFileName);
 
 TInt    FileSize(const TDesC &aFileName);
+
+void    DoFind(const TCommand &aCmd);
+void    FindFile(const TDesC &aDir, const TDesC &aFile, TBool aRecursive, void (*OpFunc)(const TDesC&));
+void    FindFileReal(const TDesC &aDir, const TDesC &aFile, void (*OpFunc)(const TDesC&));
+void    LogFile(const TDesC &aFile);
+void    DelFile(const TDesC &aFile);
 //=================================================================================
 #endif  // __MINI_CMD_H__
 //=================================================================================

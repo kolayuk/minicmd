@@ -27,6 +27,8 @@
 #include <W32STD.H>
 #include <aknglobalmsgquery.h>
 #include <aknglobalnote.h>
+#include <BAFINDF.H>
+#include <BADESCA.H>
 
 #include "MiniCMD.h"
 #include "Constant.h"
@@ -389,6 +391,11 @@ void ParseLineL(TDes &aLine, CArrayFixFlat<TCommand> *aCmdSet)
     {
         aCmdSet->AppendL(TCommand(TCommand::EStop, NULL, NULL));
     }
+    else if (cmd == KCmdFind)
+    {
+        if (iSrc.Length() > 0 && iDest.Length() > 0)
+            aCmdSet->AppendL(TCommand(TCommand::EFind, &iParam, &iSrc, &iDest));
+    }
 }
 //=================================================================================
 TInt FindPath(TDes &aLine, TDes &aPath)
@@ -643,6 +650,10 @@ TInt DoCommand(const TCommand &aCmd)
         TRAPD(iErr, DoLoadAndRunCmdL(aCmd.GetSrc()));
         return iErr;
     } 
+    
+    case TCommand::EFind:
+        DoFind(aCmd);
+        return KErrNone;
         
     default:    //the rest turn to the server (possible need tcb)
         return DobyServer(aCmd);
@@ -1369,6 +1380,7 @@ void LogToFile(TInt aErrCode, const TCommand &aCmd)
     case TCommand::ENote:       des.Append(KCmdNote);       break;
     case TCommand::ELog:        des.Append(KCmdLog);        break;
     case TCommand::ECmd:        des.Append(KCmdCmd);        break;
+    case TCommand::EFind:       des.Append(KCmdFind);       break;
     
     default:                    des.Append(_L("Not defined"));
     }
@@ -1508,6 +1520,127 @@ TInt FileSize(const TDesC &aFileName)
     if (err == KErrNone)
         return entry.iSize;
     return err;
+}
+///////////////////////////////////////////////////////////////////////////////////////////////
+void DoFind(const TCommand &aCmd)
+{
+    TBool isLog = (aCmd.GetDst() == _L("log"));
+    TBool iRecursive = aCmd.GetParam().is;
+    // nothing to do with log operation
+    if (isLog && NULL == miniLog)
+        return ;
+    
+    CDesCArray *dirs = new (ELeave)CDesCArrayFlat(3);
+    if (NULL == dirs)
+        return ;
+    
+    CleanupStack::PushL(dirs);
+    HBufC *iBuf = HBufC::NewLC(128);
+    if (NULL == iBuf)
+    {
+        CleanupStack::PopAndDestroy(dirs);
+        return ;
+    }
+    TPtr targetPtr = iBuf->Des();
+    TInt i = 0;
+  
+    while(i < aCmd.GetSrc().Length())
+    {
+        if (aCmd.GetSrc()[i] == ';')
+        {
+            dirs->AppendL(targetPtr);
+            targetPtr.Delete(0, targetPtr.Length());
+        }
+        else if(aCmd.GetSrc()[i] == '|') //
+        {
+            if (targetPtr.Length() > 0)
+                dirs->AppendL(targetPtr);
+            
+            i++; // skip '|'
+            targetPtr.Delete(0, targetPtr.Length());
+            while(i < aCmd.GetSrc().Length())
+                targetPtr.Append(aCmd.GetSrc()[i++]);
+        }
+        else
+        {
+            targetPtr.Append(aCmd.GetSrc()[i]);
+        }
+        i++;
+    }
+
+    for(i=0; i<dirs->Count(); i++)
+    {
+        if (isLog)
+            FindFile(dirs->operator[](i), targetPtr, iRecursive, LogFile);
+        else
+            FindFile(dirs->operator[](i), targetPtr, iRecursive, DelFile);
+    }
+    
+
+    CleanupStack::PopAndDestroy(iBuf);
+    CleanupStack::PopAndDestroy(dirs);
+}
+///////////////////////////////////////////////////////////////////////////////////////////////
+void FindFile(const TDesC &aDir, const TDesC &aFile, TBool aRecursive, void (*OpFunc)(const TDesC&))
+{
+    if (NULL == OpFunc)
+        return ;
+    
+    CDirScan* ds = CDirScan::NewLC(iFs);
+    if (NULL == ds)
+        return ;
+    ds->SetScanDataL(aDir, KEntryAttDir, ESortByName);
+
+    while (ETrue)
+    {
+        CDir* dir = NULL;
+        TRAPD(error, ds->NextL(dir));
+        if (KErrNone != error || NULL == dir)
+            break;
+        
+        FindFileReal(ds->FullPath(), aFile, OpFunc);
+        
+        delete dir;
+        
+        if (!aRecursive)
+            break;
+    }
+    
+    CleanupStack::PopAndDestroy(ds);
+}
+///////////////////////////////////////////////////////////////////////////////////////////////
+void FindFileReal(const TDesC &aDir, const TDesC &aFile, void (*OpFunc)(const TDesC&))
+{
+    TFindFile findFile(iFs);
+    CDir *dir = NULL;
+    TInt err = findFile.FindWildByDir(aFile, aDir, dir);
+    if (NULL == dir)
+        return ;
+
+    for (TInt i = 0; i < dir->Count(); i++)
+    {
+        TEntry entry = (*dir)[i];
+        
+        TBuf<256> filePath;
+        filePath.Append(aDir);
+        filePath.Append(entry.iName);
+        
+        OpFunc(filePath);
+    }
+    
+    delete dir;
+}
+///////////////////////////////////////////////////////////////////////////////////////////////
+void LogFile(const TDesC &aFile)
+{
+    _LOG_(aFile);
+}
+///////////////////////////////////////////////////////////////////////////////////////////////
+void DelFile(const TDesC &aFile)
+{
+    TCommand iCmd(TCommand::ERm, NULL, &aFile);
+    
+    DobyServer(iCmd);
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////
 //END OF FILE

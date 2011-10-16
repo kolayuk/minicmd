@@ -72,7 +72,8 @@ public:
         ENote,
         ELog,
         ECmd,
-        EStop
+        EStop,
+        EFind
     };
     
     TCommand() : iCmd(ENone){}
