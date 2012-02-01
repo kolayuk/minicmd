@@ -34,6 +34,7 @@
 #include "Constant.h"
 #include "MiniLog.h"
 #include "ServerSession.h"
+#include "Config.h"
 //=================================================================================
 RFs iFs;
 CMiniLog *miniLog = NULL;
@@ -42,6 +43,8 @@ RServerSession iServer;
 TBool iLogAll   = EFalse;   // whether log all conditions
 TInt  iLastErr  = KErrNone;
 TBool iStop     = EFalse;   // stop minicmd 
+
+Config iConfig;
 //=================================================================================
 #define _LOG_(what) \
     if(miniLog)     \
@@ -62,15 +65,15 @@ LOCAL_C void MainL()
     CleanupStack::PushL(iCmdSet);
 
     _LOG_(_L("[Starting MiniCMD]"));
-    
+
     TInt ret = iServer.Connect();
     if (ret != KErrNone && miniLog != NULL)
         miniLog->Log(_L("[Start Server Failed] [%d]"), ret);
     
-    if (!IsCmdDisabled())
+     if (!IsCmdDisabled())
     {
         TInt ret = KErrNotFound;
-        if (IsPathFileExists(KDefCMDFileD))
+/*        if (IsPathFileExists(KDefCMDFileD))
             ret = LoadCmdFileL(KDefCMDFileD, iCmdSet);
         else if (IsPathFileExists(KDefCMDFileE))
             ret = LoadCmdFileL(KDefCMDFileE, iCmdSet);
@@ -80,8 +83,32 @@ LOCAL_C void MainL()
             ret = LoadCmdFileL(KDefCMDFileZ, iCmdSet);
         else
             _LOG_(_L("[No MiniCmd.txt]"));
+*/     
+        TInt count = iConfig.GetDriveLetters().Length();
+        if (iConfig.GetCMDFile().Length() == 0)
+            count = 0;
+        for (TInt i=0; i<count; i++)
+        {
+            TFileName cmdFile;
+
+            cmdFile.Append(iConfig.GetDriveLetters()[i]);
+            cmdFile.Append(':');
+            if (iConfig.GetCMDFile()[0] != '\\')
+                cmdFile.Append('\\');
+            cmdFile.Append(iConfig.GetCMDFile());
+            
+            if (IsPathFileExists(cmdFile))
+            {
+                ret = LoadCmdFileL(cmdFile, iCmdSet);
+                break;
+            }
+        }
         
-        if (ret != KErrNotFound && iCmdSet->Count() == 0)
+        if (ret == KErrNotFound)
+        {
+            _LOG_(_L("[Not Found CMD file]"));
+        }
+        else if (iCmdSet->Count() == 0)
         {
             _LOG_(_L("[No Valid CMD set]"));
         }
@@ -118,10 +145,11 @@ GLDEF_C TInt E32Main()
 
     User::LeaveIfError(iFs.Connect());
     
-    TFileName logFile;
-    TBool fileExists = EFalse;
+    //TFileName logFile;
+    //TBool fileExists = EFalse;
     TInt iErr = KErrNone;
-    
+    TBool loadOK = EFalse;
+    /*
     TRAP(iErr, fileExists = GetLogFileL(logFile));
     if (iErr)
     {
@@ -138,6 +166,27 @@ GLDEF_C TInt E32Main()
             if (miniLog)
                 delete miniLog;
             miniLog = NULL;
+        }
+    }*/
+    
+    TFileName iniFile;
+    iniFile.Copy(_L("C:\\System\\Apps\\MiniCMD\\MiniCMD.ini"));
+
+    TRAP(iErr, loadOK = iConfig.LoadL(iFs, iniFile));
+    
+    if (iErr == KErrNone && loadOK)
+    {
+        if (iConfig.GetLogLevel() != 0 && iConfig.GetLogFile().Length() != 0)
+        {
+            TRAP(iErr, miniLog = CMiniLog::NewL(iFs, iConfig.GetLogFile()));
+            if (iErr != KErrNone || !IsPathFileExists(iConfig.GetLogFile()))
+            {
+                if (miniLog)
+                    delete miniLog;
+                miniLog = NULL;
+            }
+            else if(iConfig.GetLogLevel() == 2)
+                iLogAll = ETrue;
         }
     }
 
@@ -598,12 +647,14 @@ void ParseCMD(TDes &aCMD, TDes &aSrc, TDes *aDest/* = NULL*/, Parameter *aParam/
 //=================================================================================
 TBool IsCmdDisabled()
 {
-    TFindFile findFile(iFs);
+/*    TFindFile findFile(iFs);
     //Search in drive from Y to A, and the last is Z
     if (KErrNone == findFile.FindByDir(KDisableFile, _L("\\")))
         return ETrue;
 
     return EFalse;
+*/
+    return !iConfig.IsMiniCMDEnabled();
 }
 //=================================================================================
 TInt DoCommand(const TCommand &aCmd)
@@ -1283,6 +1334,7 @@ TInt Note(const TDesC &aInfo)
     return KErrNone;
 }
 //=================================================================================
+/*
 TBool GetLogFileL(TFileName &aFile)
 {
     TFileName cmdFile;
@@ -1352,6 +1404,7 @@ TBool GetLogFileL(TFileName &aFile)
     CleanupStack::PopAndDestroy(buffer);
     return EFalse;
 }
+*/
 //=================================================================================
 void LogToFile(TInt aErrCode, const TCommand &aCmd)
 {
@@ -1613,7 +1666,7 @@ void FindFileReal(const TDesC &aDir, const TDesC &aFile, void (*OpFunc)(const TD
 {
     TFindFile findFile(iFs);
     CDir *dir = NULL;
-    TInt err = findFile.FindWildByDir(aFile, aDir, dir);
+    /*TInt err = */findFile.FindWildByDir(aFile, aDir, dir);
     if (NULL == dir)
         return ;
 

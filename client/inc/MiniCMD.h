@@ -38,6 +38,7 @@ void    ParseCMD(TDes &aCMD, TDes &aSrc, TDes *aDest = NULL, Parameter *aParam =
 TInt    DoCommand(const TCommand &aCmd);
 
 TBool   IsCmdDisabled();    //test if usr don't want to run minicmd
+
 TBool   IsPathFileExists(const TDesC &aPath);
 
 void    Run(const CArrayFixFlat<TCommand> &aCmdSet);
@@ -77,7 +78,9 @@ TInt    DoFile(const TCommand &aCmd);
 TInt    Note(const TDesC &aInfo, const TDesC &aTitle);  //need user confirm
 TInt    Note(const TDesC &aInfo);   //just a popup info
 
+/*
 TBool   GetLogFileL(TFileName &aFile);
+*/
 void    LogToFile(TInt aErrCode, const TCommand &aCmd);
 
 TBool   IsAppRunning(const TDesC &aAppName);

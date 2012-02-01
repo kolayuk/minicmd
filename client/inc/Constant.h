@@ -21,14 +21,14 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ============================================================================
  */
-
+/*
 _LIT(KDefCMDFileD, "D:\\Data\\MiniCmd.txt");
 _LIT(KDefCMDFileE, "E:\\Data\\MiniCmd.txt");
 _LIT(KDefCMDFileC, "C:\\Data\\MiniCmd.txt");
 _LIT(KDefCMDFileZ, "Z:\\Data\\MiniCmd.txt");
 
 _LIT(KDisableFile, "MiniCmd.disable");
-
+*/
 _LIT(KLogFmt,       "] [%d]");
 
 _LIT(KCmdAbort,     "abort");

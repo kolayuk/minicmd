@@ -30,7 +30,7 @@ USERINCLUDE	 ..\client\inc
 SYSTEMINCLUDE   \epoc32\include
 
 SOURCEPATH	..\client\src
-SOURCE		  MiniCMD.cpp MiniLog.cpp ServerSession.cpp
+SOURCE		  MiniCMD.cpp MiniLog.cpp ServerSession.cpp Config.cpp
 
 LIBRARY	euser.lib
 LIBRARY efsrv.lib
