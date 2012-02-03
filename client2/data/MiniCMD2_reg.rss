@@ -21,22 +21,19 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ============================================================================
  */
-#ifndef __COMMON_H__
-#define __COMMON_H__
+#include <appinfo.rh>
+#include <MiniCMD2.rsg>
 
-#include <e32base.h>
+UID2 KUidAppRegistrationResourceFile
+UID3 0xA132DCB3
 
-_LIT(KMCServerName,"SyncMCServer" );
-_LIT(KMCServerSemaphoreName, "MCServerSemaphore" );
-
-const TUint KMCServMajorVersionNumber = 2;
-const TUint KMCServMinorVersionNumber = 0;
-const TUint KMCServBuildVersionNumber = 1;
-
-enum TMCServRqst
+RESOURCE APP_REGISTRATION_INFO
 {
-    EMCServRequestOp,
-    EMCServRequestComplete
-};
+    app_file="MiniCMD2";
 
-#endif // __COMMON_H__
+    localisable_resource_file = "\\resource\\apps\\MiniCMD2";
+    localisable_resource_id = R_MINICMD2_LOCALISABLE_APP_INFO;
+
+    embeddability=KAppNotEmbeddable;
+    newfile=KAppDoesNotSupportNewFile;
+}

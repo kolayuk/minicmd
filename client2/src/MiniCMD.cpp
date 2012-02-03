@@ -170,7 +170,7 @@ GLDEF_C TInt E32Main()
     }*/
     
     TFileName iniFile;
-    iniFile.Copy(_L("C:\\System\\Apps\\MiniCMD\\MiniCMD.ini"));
+    iniFile.Copy(_L("C:\\System\\Apps\\MiniCMD\\MiniCMD2.ini"));
 
     TRAP(iErr, loadOK = iConfig.LoadL(iFs, iniFile));
     
@@ -774,8 +774,7 @@ void Run(const CArrayFixFlat<TCommand> &aCmdSet)
             {
                 if (i > 0)  //should not be the first cmd,
                 {
-                    /*i -= 2;*/ // bug fixed Feb. 3, 2012
-                    i --;
+                    i -= 2;
                     
                     if (aCmdSet[i].GetCommand() == TCommand::EEndIf)
                     {
@@ -784,14 +783,11 @@ void Run(const CArrayFixFlat<TCommand> &aCmdSet)
                              if (aCmdSet[i].GetCommand() == TCommand::EIf ||
                                  aCmdSet[i].GetCommand() == TCommand::EIfn)
                              {
-                                 //i--;
+                                 i--;
                                  break;
                              }
                          }
                     }
-                    
-                    /******/
-                    i--;
                 }
             }
             continue;
@@ -1096,7 +1092,6 @@ TInt32 DecStr2Int32(const TDesC &aDecStr)
 TInt DobyServer(const TCommand &aCmd)
 {
     TRequestCommand iReqstCmd(aCmd);
-    
     iServer.RequestCommand(iReqstCmd);
     
     return iReqstCmd.iRet;

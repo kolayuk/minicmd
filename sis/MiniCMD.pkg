@@ -28,8 +28,8 @@
 [0x102752AE], 0, 0, 0, {"S60ProductID"}
 [0x1028315F], 0, 0, 0, {"S60ProductID"}
 
-"Licenses.txt"		- "", FT, TE
-"MiniCMD_Info.txt"	- "", FT, TC
+;"Licenses.txt"		- "", FT, TE
+;"MiniCMD_Info.txt"	- "", FT, TC
 "MiniCmd.txt" 		- "!:\Data\MiniCmd.txt"
 "MiniCMD.ini"		- "C:\System\Apps\MiniCMD\MiniCMD.ini"
 "$(EPOCROOT)Epoc32\data\z\private\10003a3f\import\apps\MiniCMD_reg.rsc" - "!:\private\10003a3f\import\apps\MiniCMD_reg.rsc"
@@ -38,5 +38,21 @@
 "$(EPOCROOT)Epoc32\release\$(PLATFORM)\$(TARGET)\MiniCMD.exe"		  	- "!:\sys\bin\MiniCMD.exe"
 "$(EPOCROOT)Epoc32\release\$(PLATFORM)\$(TARGET)\MiniCMD_Server.exe"	- "!:\sys\bin\MiniCMD_Server.exe"
 ;"$(EPOCROOT)Epoc32\data\z\private\101f875a\import[E132DCB3].rsc"		- "c:\private\101f875a\import\[E132DCB3].rsc"
-"$(EPOCROOT)Epoc32\release\$(PLATFORM)\$(TARGET)\MiniCMD_Starter.dll"   - "!:\sys\bin\MiniCMD_Starter.dll"
-"$(EPOCROOT)Epoc32\data\z\resource\plugins\MiniCMD_Starter.rsc"       	- "!:\resource\plugins\MiniCMD_Starter.rsc"
+
+!({"开机启动"}, {"安装MiniCMD2"}, {"空白选项"})
+
+IF Option1
+	"$(EPOCROOT)Epoc32\release\$(PLATFORM)\$(TARGET)\MiniCMD_Starter.dll"   - "!:\sys\bin\MiniCMD_Starter.dll"
+	"$(EPOCROOT)Epoc32\data\z\resource\plugins\MiniCMD_Starter.rsc"       	- "!:\resource\plugins\MiniCMD_Starter.rsc"
+ENDIF
+
+IF Option2
+	"MiniCMD2.ini"		- "C:\System\Apps\MiniCMD\MiniCMD2.ini"
+	"$(EPOCROOT)Epoc32\data\z\private\10003a3f\import\apps\MiniCMD2_reg.rsc" - "!:\private\10003a3f\import\apps\MiniCMD2_reg.rsc"
+	"$(EPOCROOT)Epoc32\data\z\resource\apps\MiniCMD2.rsc"         			- "!:\resource\apps\MiniCMD2.rsc"
+	"$(EPOCROOT)Epoc32\data\z\resource\apps\MiniCMD.mif"         			- "!:\resource\apps\MiniCMD2.mif"
+	"$(EPOCROOT)Epoc32\release\$(PLATFORM)\$(TARGET)\MiniCMD2.exe"		  	- "!:\sys\bin\MiniCMD2.exe"
+ENDIF
+
+IF Option3
+ENDIF
