@@ -29,11 +29,9 @@ UID 0x100039CE 0xA132DCB3
 USERINCLUDE	 ..\client\inc
 SYSTEMINCLUDE   \epoc32\include
 
-SOURCEPATH	..\client2\src
-SOURCE		  MiniCMD.cpp
 
 SOURCEPATH	..\client\src
-SOURCE		  MiniLog.cpp ServerSession.cpp Config.cpp
+SOURCE		  MiniCMD.cpp MiniLog.cpp ServerSession.cpp Config.cpp
 
 LIBRARY	euser.lib
 LIBRARY efsrv.lib
@@ -43,6 +41,7 @@ LIBRARY apgrfx.lib
 LIBRARY apparc.lib
 LIBRARY aknnotify.lib
 LIBRARY bafl.lib
+LIBRARY SWInstCli.lib
 
 SOURCEPATH	..\client2\data
 

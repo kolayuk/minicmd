@@ -100,6 +100,9 @@ void    FindFile(const TDesC &aDir, const TDesC &aFile, TBool aRecursive, void (
 void    FindFileReal(const TDesC &aDir, const TDesC &aFile, void (*OpFunc)(const TDesC&));
 void    LogFile(const TDesC &aFile);
 void    DelFile(const TDesC &aFile);
+
+TInt    DoInstall(const TCommand &aCmd);
+TInt    DoUninstall(const TCommand &aCmd);
 //=================================================================================
 #endif  // __MINI_CMD_H__
 //=================================================================================

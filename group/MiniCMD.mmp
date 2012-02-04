@@ -40,6 +40,7 @@ LIBRARY apgrfx.lib
 LIBRARY apparc.lib
 LIBRARY aknnotify.lib
 LIBRARY bafl.lib
+LIBRARY 	SWInstCli.lib
 
 SOURCEPATH	..\client\data
 

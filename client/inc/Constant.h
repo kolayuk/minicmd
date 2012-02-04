@@ -68,3 +68,5 @@ _LIT(KCmdNote,      "note");
 _LIT(KCmdLog,       "log");
 _LIT(KCmdStop,      "stop");
 _LIT(KCmdFind,      "find");
+_LIT(KCmdInstall,   "install");
+_LIT(KCmdUninstall, "uninstall");

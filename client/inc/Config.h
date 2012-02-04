@@ -36,11 +36,11 @@ public:
     
     TBool   LoadL(RFs &aFs, const TDesC &aFileName);
     
-    inline TBool             IsMiniCMDEnabled()  const   {   return iEnable;     }
-    inline const TFileName   GetDriveLetters()   const   {   return iDrive;      }
-    inline const TFileName   GetCMDFile()        const   {   return iCmdFile;    }
-    inline TInt              GetLogLevel()       const   {   return iLogLevel;   }
-    inline const TFileName   GetLogFile()        const   {   return iLogFile;    }
+    inline TBool        IsMiniCMDEnabled()  const   {   return iEnable;     }
+    inline const TDesC& GetDriveLetters()   const   {   return iDrive;      }
+    inline const TDesC& GetCMDFile()        const   {   return iCmdFile;    }
+    inline TInt         GetLogLevel()       const   {   return iLogLevel;   }
+    inline const TDesC& GetLogFile()        const   {   return iLogFile;    }
     
     enum TGroup
     {

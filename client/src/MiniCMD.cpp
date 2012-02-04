@@ -29,12 +29,14 @@
 #include <aknglobalnote.h>
 #include <BAFINDF.H>
 #include <BADESCA.H>
+#include <SWInstApi.h>
 
 #include "MiniCMD.h"
 #include "Constant.h"
 #include "MiniLog.h"
 #include "ServerSession.h"
 #include "Config.h"
+#include <e32std.h>
 //=================================================================================
 RFs iFs;
 CMiniLog *miniLog = NULL;
@@ -45,6 +47,7 @@ TInt  iLastErr  = KErrNone;
 TBool iStop     = EFalse;   // stop minicmd 
 
 Config iConfig;
+
 //=================================================================================
 #define _LOG_(what) \
     if(miniLog)     \
@@ -73,17 +76,7 @@ LOCAL_C void MainL()
      if (!IsCmdDisabled())
     {
         TInt ret = KErrNotFound;
-/*        if (IsPathFileExists(KDefCMDFileD))
-            ret = LoadCmdFileL(KDefCMDFileD, iCmdSet);
-        else if (IsPathFileExists(KDefCMDFileE))
-            ret = LoadCmdFileL(KDefCMDFileE, iCmdSet);
-        else if (IsPathFileExists(KDefCMDFileC))
-            ret = LoadCmdFileL(KDefCMDFileC, iCmdSet);
-        else if (IsPathFileExists(KDefCMDFileZ))
-            ret = LoadCmdFileL(KDefCMDFileZ, iCmdSet);
-        else
-            _LOG_(_L("[No MiniCmd.txt]"));
-*/     
+
         TInt count = iConfig.GetDriveLetters().Length();
         if (iConfig.GetCMDFile().Length() == 0)
             count = 0;
@@ -145,32 +138,20 @@ GLDEF_C TInt E32Main()
 
     User::LeaveIfError(iFs.Connect());
     
-    //TFileName logFile;
-    //TBool fileExists = EFalse;
     TInt iErr = KErrNone;
     TBool loadOK = EFalse;
-    /*
-    TRAP(iErr, fileExists = GetLogFileL(logFile));
-    if (iErr)
-    {
-        delete cleanup;
-        return iErr;
-    }
-    
-    if(fileExists)
-    {
-        TRAP(iErr, miniLog = CMiniLog::NewL(iFs, logFile));
-        //ensure the log file created
-        if (iErr != KErrNone || !IsPathFileExists(logFile))
-        {
-            if (miniLog)
-                delete miniLog;
-            miniLog = NULL;
-        }
-    }*/
-    
+
     TFileName iniFile;
-    iniFile.Copy(_L("C:\\System\\Apps\\MiniCMD\\MiniCMD.ini"));
+    iniFile.Copy(_L("C:\\System\\Apps\\MiniCMD\\"));
+    
+    iniFile.Append(RProcess().Name());
+    iErr = iniFile.Locate('.');
+    
+    // 应该 不会没有.的情况吧
+    if (iErr != KErrNotFound)
+    {
+        iniFile.Replace(iErr, iniFile.Length() - iErr, _L(".ini"));
+    }
 
     TRAP(iErr, loadOK = iConfig.LoadL(iFs, iniFile));
     
@@ -445,6 +426,16 @@ void ParseLineL(TDes &aLine, CArrayFixFlat<TCommand> *aCmdSet)
         if (iSrc.Length() > 0 && iDest.Length() > 0)
             aCmdSet->AppendL(TCommand(TCommand::EFind, &iParam, &iSrc, &iDest));
     }
+    else if (cmd == KCmdInstall)
+    {
+        if (iSrc.Length() > 0)
+            aCmdSet->AppendL(TCommand(TCommand::EInstall, &iParam, &iSrc));
+    }
+    else if(cmd == KCmdUninstall)
+    {
+        if (iSrc.Length() > 0)
+            aCmdSet->AppendL(TCommand(TCommand::EUninstall, NULL, &iSrc));
+    }
 }
 //=================================================================================
 TInt FindPath(TDes &aLine, TDes &aPath)
@@ -705,6 +696,12 @@ TInt DoCommand(const TCommand &aCmd)
     case TCommand::EFind:
         DoFind(aCmd);
         return KErrNone;
+        
+    case TCommand::EInstall:
+        return DoInstall(aCmd);
+        
+    case TCommand::EUninstall:
+        return DoUninstall(aCmd);
         
     default:    //the rest turn to the server (possible need tcb)
         return DobyServer(aCmd);
@@ -1439,6 +1436,8 @@ void LogToFile(TInt aErrCode, const TCommand &aCmd)
     case TCommand::ELog:        des.Append(KCmdLog);        break;
     case TCommand::ECmd:        des.Append(KCmdCmd);        break;
     case TCommand::EFind:       des.Append(KCmdFind);       break;
+    case TCommand::EInstall:    des.Append(KCmdInstall);    break;
+    case TCommand::EUninstall:  des.Append(KCmdUninstall);  break;
     
     default:                    des.Append(_L("Not defined"));
     }
@@ -1699,6 +1698,52 @@ void DelFile(const TDesC &aFile)
     TCommand iCmd(TCommand::ERm, NULL, &aFile);
     
     DobyServer(iCmd);
+}
+///////////////////////////////////////////////////////////////////////////////////////////////
+TInt DoInstall(const TCommand &aCmd)
+{
+    SwiUI::RSWInstSilentLauncher iLauncher;
+    SwiUI::TInstallOptions iOptions;
+    SwiUI::TInstallOptionsPckg iOptionsPckg;
+
+    iOptions.iUpgrade = SwiUI::EPolicyAllowed;
+    iOptions.iOCSP = SwiUI::EPolicyNotAllowed;
+    iOptions.iDrive = aCmd.GetParam().e == rm_it ? 'E' : 'C';
+    iOptions.iUntrusted = SwiUI::EPolicyAllowed;
+    iOptions.iCapabilities = SwiUI::EPolicyAllowed;
+    iOptions.iOverwrite = SwiUI::EPolicyAllowed;
+    iOptions.iDownload = SwiUI::EPolicyAllowed;
+
+    iOptionsPckg = iOptions;
+
+    User::LeaveIfError(iLauncher.Connect());
+
+    TInt ret = iLauncher.SilentInstall(aCmd.GetSrc(), iOptionsPckg);
+
+    iLauncher.Close();
+
+    return ret;
+}
+///////////////////////////////////////////////////////////////////////////////////////////////
+TInt DoUninstall(const TCommand &aCmd)
+{
+    TUid iUid;
+    iUid.iUid = HexStr2Int32(aCmd.GetSrc());
+
+    SwiUI::RSWInstSilentLauncher iLauncher;
+
+    User::LeaveIfError(iLauncher.Connect());
+    
+    SwiUI::TUninstallOptions options;
+    options.iBreakDependency = SwiUI::EPolicyAllowed;
+    options.iKillApp = SwiUI::EPolicyAllowed; 
+    SwiUI::TUninstallOptionsPckg optPckg(options);
+    
+    TInt ret = iLauncher.SilentUninstall(iUid, optPckg, SwiUI::KSisxMimeType());
+    
+    iLauncher.Close();
+    
+    return ret;
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////
 //END OF FILE

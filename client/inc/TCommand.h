@@ -73,7 +73,9 @@ public:
         ELog,
         ECmd,
         EStop,
-        EFind
+        EFind,
+        EInstall,
+        EUninstall
     };
     
     TCommand() : iCmd(ENone){}
