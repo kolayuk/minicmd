@@ -1743,10 +1743,10 @@ TInt DoInstall(TChar aDrive, const TDesC &aPath)
 
     iOptionsPckg = iOptions;
     
-    TEntry entry;
+/*    TEntry entry;*/
     TInt ret = KErrNone;
     
-    if (iFs.Entry(aPath, entry) != KErrNone && entry.IsDir())
+/*    if (iFs.Entry(aPath, entry) != KErrNone && entry.IsDir())
     {
         TFindFile findFile(iFs);
         CDir *dir = NULL;
@@ -1770,7 +1770,7 @@ TInt DoInstall(TChar aDrive, const TDesC &aPath)
         
         delete dir;
     }
-    else
+    else*/
     {
         ret = iLauncher.SilentInstall(aPath, iOptionsPckg);
     }
