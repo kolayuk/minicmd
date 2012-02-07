@@ -101,8 +101,8 @@ void    FindFileReal(const TDesC &aDir, const TDesC &aFile, void (*OpFunc)(const
 void    LogFile(const TDesC &aFile);
 void    DelFile(const TDesC &aFile);
 
-TInt    DoInstall(const TCommand &aCmd);
-TInt    DoUninstall(const TCommand &aCmd);
+TInt    DoInstall(TChar aDrive, const TDesC &aPath);
+TInt    DoUninstall(TInt aUid);
 //=================================================================================
 #endif  // __MINI_CMD_H__
 //=================================================================================

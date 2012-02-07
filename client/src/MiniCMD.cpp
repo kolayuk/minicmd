@@ -62,7 +62,7 @@ LOCAL_C void MainL()
     CArrayFixFlat<TCommand> *iCmdSet = new(ELeave) CArrayFixFlat<TCommand>(10);
     if (!iCmdSet)
     {
-        CleanupStack::PopAndDestroy();
+//        CleanupStack::PopAndDestroy();
         return ;
     }
     CleanupStack::PushL(iCmdSet);
@@ -73,7 +73,7 @@ LOCAL_C void MainL()
     if (ret != KErrNone && miniLog != NULL)
         miniLog->Log(_L("[Start Server Failed] [%d]"), ret);
     
-     if (!IsCmdDisabled())
+    if (!IsCmdDisabled())
     {
         TInt ret = KErrNotFound;
 
@@ -142,7 +142,7 @@ GLDEF_C TInt E32Main()
     TBool loadOK = EFalse;
 
     TFileName iniFile;
-    iniFile.Copy(_L("C:\\System\\Apps\\MiniCMD\\"));
+    iniFile.Copy(_L("E:\\System\\Apps\\MiniCMD\\"));
     
     iniFile.Append(RProcess().Name());
     iErr = iniFile.Locate('.');
@@ -151,6 +151,14 @@ GLDEF_C TInt E32Main()
     if (iErr != KErrNotFound)
     {
         iniFile.Replace(iErr, iniFile.Length() - iErr, _L(".ini"));
+    }
+    
+    // 先E后C再Z
+    if (!IsPathFileExists(iniFile))
+    {
+        iniFile[0] = 'C';
+        if (!IsPathFileExists(iniFile))
+            iniFile[0] = 'Z';
     }
 
     TRAP(iErr, loadOK = iConfig.LoadL(iFs, iniFile));
@@ -698,10 +706,10 @@ TInt DoCommand(const TCommand &aCmd)
         return KErrNone;
         
     case TCommand::EInstall:
-        return DoInstall(aCmd);
+        return DoInstall(aCmd.GetParam().e == rm_it ? 'E' : 'C', aCmd.GetSrc());
         
     case TCommand::EUninstall:
-        return DoUninstall(aCmd);
+        return DoUninstall(HexStr2Int32(aCmd.GetSrc()));
         
     default:    //the rest turn to the server (possible need tcb)
         return DobyServer(aCmd);
@@ -721,13 +729,14 @@ TBool IsPathFileExists(const TDesC &aPath)
 void Run(const CArrayFixFlat<TCommand> &aCmdSet)
 {
     TBool fLastCondition = EFalse;
-
+    
     for(TInt i=0; i<aCmdSet.Count(); i++)
     {
         if (iStop)
             break;
+        // 这个'&'害死人了
+        const TCommand &cmd = aCmdSet[i];
         
-        TCommand cmd = aCmdSet.operator [](i);
         TCommand::TCommandSet cs = cmd.GetCommand();
 
         if (cmd.AbortIfExists() || cmd.AbortIfNotExists())  //abort_if_(not_)exists
@@ -771,7 +780,7 @@ void Run(const CArrayFixFlat<TCommand> &aCmdSet)
             {
                 if (i > 0)  //should not be the first cmd,
                 {
-                    /*i -= 2;*/ // bug fixed Feb. 3, 2012
+                    //i -= 2; // bug fixed Feb. 3, 2012
                     i --;
                     
                     if (aCmdSet[i].GetCommand() == TCommand::EEndIf)
@@ -787,7 +796,6 @@ void Run(const CArrayFixFlat<TCommand> &aCmdSet)
                          }
                     }
                     
-                    /******/
                     i--;
                 }
             }
@@ -1700,15 +1708,17 @@ void DelFile(const TDesC &aFile)
     DobyServer(iCmd);
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////
-TInt DoInstall(const TCommand &aCmd)
+TInt DoInstall(TChar aDrive, const TDesC &aPath)
 {
     SwiUI::RSWInstSilentLauncher iLauncher;
     SwiUI::TInstallOptions iOptions;
     SwiUI::TInstallOptionsPckg iOptionsPckg;
+    
+    User::LeaveIfError(iLauncher.Connect());
 
     iOptions.iUpgrade = SwiUI::EPolicyAllowed;
     iOptions.iOCSP = SwiUI::EPolicyNotAllowed;
-    iOptions.iDrive = aCmd.GetParam().e == rm_it ? 'E' : 'C';
+    iOptions.iDrive = aDrive;
     iOptions.iUntrusted = SwiUI::EPolicyAllowed;
     iOptions.iCapabilities = SwiUI::EPolicyAllowed;
     iOptions.iOverwrite = SwiUI::EPolicyAllowed;
@@ -1716,19 +1726,16 @@ TInt DoInstall(const TCommand &aCmd)
 
     iOptionsPckg = iOptions;
 
-    User::LeaveIfError(iLauncher.Connect());
-
-    TInt ret = iLauncher.SilentInstall(aCmd.GetSrc(), iOptionsPckg);
+    TInt ret = iLauncher.SilentInstall(aPath, iOptionsPckg);
 
     iLauncher.Close();
 
     return ret;
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////
-TInt DoUninstall(const TCommand &aCmd)
+TInt DoUninstall(TInt aUid)
 {
-    TUid iUid;
-    iUid.iUid = HexStr2Int32(aCmd.GetSrc());
+    TUid iUid = { aUid };
 
     SwiUI::RSWInstSilentLauncher iLauncher;
 
