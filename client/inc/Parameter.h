@@ -43,14 +43,18 @@ struct Parameter
     TBool ow;       //overwrite exists file?
     
     AttStatus c;    //use keycode, for key && longkey / for file, create
-    
+   
     AttStatus a;    //for if/else ::application
     
     AttStatus e;    //last error status
     
+    AttStatus w;    // wait for process finish
+    
+    AttStatus t;    // time string
+    
     Parameter()
     {
-        s = h = r = c = a = e = not_set;
+        s = h = r = c = a = e = w = t = not_set;
         is = ow = EFalse;
     }
     
@@ -68,6 +72,8 @@ struct Parameter
         this->c = other.c;
         this->a = other.a;
         this->e = other.e;
+        this->w = other.w;
+        this->t = other.t;
         
         return *this;
     }

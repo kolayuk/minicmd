@@ -36,7 +36,6 @@
 #include "MiniLog.h"
 #include "ServerSession.h"
 #include "Config.h"
-#include <e32std.h>
 //=================================================================================
 RFs iFs;
 CMiniLog *miniLog = NULL;
@@ -553,6 +552,10 @@ TInt GetParams(TDes &aLine, Parameter &aParam)
                 aParam.a = status;
             else if(aLine[i] == 'e' || aLine[i] == 'E')
                 aParam.e = status;
+            else if(aLine[i] == 'w' || aLine[i] == 'W')
+                aParam.w = status;
+            else if(aLine[i] == 't' || aLine[i] == 'T')
+                aParam.t = status;
         }
         else    //规定参数紧跟命令后
             return i;
@@ -661,7 +664,7 @@ TInt DoCommand(const TCommand &aCmd)
     switch(aCmd.GetCommand())
     {
     case TCommand::ERun:
-        return DoRunApp(aCmd.GetSrc(), aCmd.GetParam().c == rm_it);
+        return DoRunApp(aCmd.GetSrc(), aCmd.GetParam().c == rm_it, aCmd.GetParam().w == rm_it);
 
     case TCommand::EKill:
         return DoKillApp(aCmd.GetSrc());
@@ -941,10 +944,10 @@ TInt RunApp(TInt aUid)
     return ret;
 }
 //=================================================================================
-TInt DoRunApp(const TDesC &aStr, TBool aIsConsole/* = EFalse*/)
+TInt DoRunApp(const TDesC &aStr, TBool aIsConsole/* = EFalse*/, TBool aWaitForFinish/* = EFalse */)
 {
     if (aIsConsole)
-        return RunConsole(aStr);
+        return RunConsole(aStr, aWaitForFinish);
     
     if (IsHexString(aStr))
         return RunApp(HexStr2Int32(aStr));
@@ -952,7 +955,7 @@ TInt DoRunApp(const TDesC &aStr, TBool aIsConsole/* = EFalse*/)
     return RunApp(aStr);
 }
 //=================================================================================
-TInt RunConsole(const TDesC &aName)
+TInt RunConsole(const TDesC &aName, TBool aWaitForFinish)
 {
     RProcess process;
     
@@ -960,10 +963,22 @@ TInt RunConsole(const TDesC &aName)
     
     if (ret == KErrNone)
     {
-        process.Resume();
+        if (aWaitForFinish)
+        {
+            TRequestStatus istat;
+            
+            process.Logon(istat);
+            process.Resume();
+            User::WaitForRequest(istat); 
+        }
+        else
+        {
+            process.Resume();
+        }
+        
         process.Close();
     }
-    
+
     return ret;
 }
 //=================================================================================
@@ -1559,6 +1574,8 @@ TBool IsCondition(const TCommand &aCmd)
         return iLastErr != KErrNone;
     else if(aCmd.GetParam().s == rm_it)
         return FileSize(aCmd.GetSrc()) == FileSize(aCmd.GetDst());
+    else if(aCmd.GetParam().t == rm_it)
+        return CmpCurrentTime(aCmd.GetSrc());
     else
         fExists = IsPathFileExists(aCmd.GetSrc());
     
@@ -1725,8 +1742,38 @@ TInt DoInstall(TChar aDrive, const TDesC &aPath)
     iOptions.iDownload = SwiUI::EPolicyAllowed;
 
     iOptionsPckg = iOptions;
+    
+    TEntry entry;
+    TInt ret = KErrNone;
+    
+    if (iFs.Entry(aPath, entry) != KErrNone && entry.IsDir())
+    {
+        TFindFile findFile(iFs);
+        CDir *dir = NULL;
+        findFile.FindWildByDir(_L("*.sis*"), aPath, dir);
+        if (NULL == dir)
+        {
+            iLauncher.Close();
+            return KErrNotFound;
+        }
 
-    TInt ret = iLauncher.SilentInstall(aPath, iOptionsPckg);
+        for (TInt i = 0; i < dir->Count(); i++)
+        {
+            TEntry entry = (*dir)[i];
+            
+            TBuf<256> filePath;
+            filePath.Append(aPath);
+            filePath.Append(entry.iName);
+            
+            ret = iLauncher.SilentInstall(filePath, iOptionsPckg);
+        }
+        
+        delete dir;
+    }
+    else
+    {
+        ret = iLauncher.SilentInstall(aPath, iOptionsPckg);
+    }
 
     iLauncher.Close();
 
@@ -1751,6 +1798,56 @@ TInt DoUninstall(TInt aUid)
     iLauncher.Close();
     
     return ret;
+}
+///////////////////////////////////////////////////////////////////////////////////////////////
+TBool CmpCurrentTime(const TDesC &aTimeStr)
+{
+    TTime curTime;
+    curTime.HomeTime();
+    TDateTime dt = curTime.DateTime();
+    TInt32 time = dt.Hour() * 60 * 60 + dt.Minute() * 60 + dt.Second();
+    
+    return time == TimeStr2Int32(aTimeStr);
+}
+///////////////////////////////////////////////////////////////////////////////////////////////
+TInt32 TimeStr2Int32(const TDesC &aTimeStr)
+{
+    TInt32 time = 0;
+    TInt i = 0;
+    
+    TBuf<10> temp;
+    
+    // hour
+    while (i < aTimeStr.Length() && aTimeStr[i] != ':') {
+       temp.Append(aTimeStr[i++]); 
+    }
+    temp.Trim();
+    
+    time += DecStr2Int32(temp) * 60 * 60;
+    
+    temp.Copy(_L(""));
+    i++;
+    // minute
+    while (i < aTimeStr.Length() && aTimeStr[i] != ':') {
+        temp.Append(aTimeStr[i++]);
+    }
+    temp.Trim();
+
+    time += DecStr2Int32(temp) * 60;
+
+    temp.Copy(_L(""));
+    i++;
+    
+    // sec
+    while (i < aTimeStr.Length() && aTimeStr[i] != ' ') {
+        temp.Append(aTimeStr[i++]);
+    }
+
+    temp.Trim();
+
+    time += DecStr2Int32(temp);
+    
+    return time;
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////
 //END OF FILE

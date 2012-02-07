@@ -11,7 +11,7 @@
 ;
 ; UID is the exe's UID
 ;
-#{"MiniCMD"},(0xE132DCB3),2,1,0
+#{"MiniCMD v2.1 beta2"},(0xE132DCB3),2,1,0
 
 ;Language - standard language definitions
 &ZH
@@ -28,8 +28,8 @@
 [0x102752AE], 0, 0, 0, {"S60ProductID"}
 [0x1028315F], 0, 0, 0, {"S60ProductID"}
 
-;"Licenses.txt"		- "", FT, TE
-;"MiniCMD_Info.txt"	- "", FT, TC
+"Licenses.txt"		- "", FT, TE
+"MiniCMD_Info.txt"	- "", FT, TC
 "MiniCmd.txt" 		- "!:\Data\MiniCmd.txt"
 "MiniCMD.ini"		- "C:\System\Apps\MiniCMD\MiniCMD.ini"
 "$(EPOCROOT)Epoc32\data\z\private\10003a3f\import\apps\MiniCMD_reg.rsc" - "!:\private\10003a3f\import\apps\MiniCMD_reg.rsc"

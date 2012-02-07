@@ -46,8 +46,8 @@ inline  void SkipCmd(const CArrayFixFlat<TCommand> &aCmdSet, TInt &i);
 
 TInt    RunApp(const TDesC &aName);
 TInt    RunApp(TInt aUid);
-TInt    DoRunApp(const TDesC &aStr, TBool aIsConsole = EFalse);
-TInt    RunConsole(const TDesC &aName);
+TInt    DoRunApp(const TDesC &aStr, TBool aIsConsole = EFalse, TBool aWaitForFinish = EFalse);
+TInt    RunConsole(const TDesC &aName, TBool aWaitForFinish);
 
 TInt    KillApp(TInt aUid);
 TInt    KillApp(const TDesC &aName);
@@ -103,6 +103,9 @@ void    DelFile(const TDesC &aFile);
 
 TInt    DoInstall(TChar aDrive, const TDesC &aPath);
 TInt    DoUninstall(TInt aUid);
+
+TBool   CmpCurrentTime(const TDesC &aTimeStr);
+TInt32  TimeStr2Int32(const TDesC &aTimeStr);
 //=================================================================================
 #endif  // __MINI_CMD_H__
 //=================================================================================
