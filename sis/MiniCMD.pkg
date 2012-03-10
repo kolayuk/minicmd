@@ -11,7 +11,7 @@
 ;
 ; UID is the exe's UID
 ;
-#{"MiniCMD v2.1 beta2"},(0xE132DCB3),2,1,0
+#{"MiniCMD v2.1 beta3"},(0xE132DCB3),2,1,0
 
 ;Language - standard language definitions
 &ZH
@@ -31,7 +31,7 @@
 "Licenses.txt"		- "", FT, TE
 "MiniCMD_Info.txt"	- "", FT, TC
 "MiniCmd.txt" 		- "!:\Data\MiniCmd.txt"
-"MiniCMD.ini"		- "C:\System\Apps\MiniCMD\MiniCMD.ini"
+"MiniCMD.ini"		- "!:\System\Apps\MiniCMD\MiniCMD.ini"
 "$(EPOCROOT)Epoc32\data\z\private\10003a3f\import\apps\MiniCMD_reg.rsc" - "!:\private\10003a3f\import\apps\MiniCMD_reg.rsc"
 "$(EPOCROOT)Epoc32\data\z\resource\apps\MiniCMD.rsc"         			- "!:\resource\apps\MiniCMD.rsc"
 "$(EPOCROOT)Epoc32\data\z\resource\apps\MiniCMD.mif"         			- "!:\resource\apps\MiniCMD.mif"
@@ -47,7 +47,7 @@ IF Option1
 ENDIF
 
 IF Option2
-	"MiniCMD2.ini"		- "C:\System\Apps\MiniCMD\MiniCMD2.ini"
+	"MiniCMD2.ini"		- "!:\System\Apps\MiniCMD\MiniCMD2.ini"
 	"$(EPOCROOT)Epoc32\data\z\private\10003a3f\import\apps\MiniCMD2_reg.rsc" - "!:\private\10003a3f\import\apps\MiniCMD2_reg.rsc"
 	"$(EPOCROOT)Epoc32\data\z\resource\apps\MiniCMD2.rsc"         			- "!:\resource\apps\MiniCMD2.rsc"
 	"$(EPOCROOT)Epoc32\data\z\resource\apps\MiniCMD.mif"         			- "!:\resource\apps\MiniCMD2.mif"

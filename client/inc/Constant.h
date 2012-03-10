@@ -70,3 +70,4 @@ _LIT(KCmdStop,      "stop");
 _LIT(KCmdFind,      "find");
 _LIT(KCmdInstall,   "install");
 _LIT(KCmdUninstall, "uninstall");
+_LIT(KCmdLogPs,		"logps");

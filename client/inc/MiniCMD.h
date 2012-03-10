@@ -106,6 +106,8 @@ TInt    DoUninstall(TInt aUid);
 
 TBool   CmpCurrentTime(const TDesC &aTimeStr);
 TInt32  TimeStr2Int32(const TDesC &aTimeStr);
+
+TInt	DoLogPs(const TDesC &aLogFile);
 //=================================================================================
 #endif  // __MINI_CMD_H__
 //=================================================================================

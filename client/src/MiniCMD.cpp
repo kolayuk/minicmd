@@ -443,6 +443,10 @@ void ParseLineL(TDes &aLine, CArrayFixFlat<TCommand> *aCmdSet)
         if (iSrc.Length() > 0)
             aCmdSet->AppendL(TCommand(TCommand::EUninstall, NULL, &iSrc));
     }
+    else if(cmd == KCmdLogPs)
+    {
+    	aCmdSet->AppendL(TCommand(TCommand::ELogPs, NULL, &iSrc));
+    }
 }
 //=================================================================================
 TInt FindPath(TDes &aLine, TDes &aPath)
@@ -494,8 +498,6 @@ TInt FindPath(TDes &aLine, TDes &aPath)
 
         return i;
     }
-    
-    return 0;
 }
 //=================================================================================
 TInt GetParams(TDes &aLine, Parameter &aParam)
@@ -713,6 +715,9 @@ TInt DoCommand(const TCommand &aCmd)
         
     case TCommand::EUninstall:
         return DoUninstall(HexStr2Int32(aCmd.GetSrc()));
+        
+    case TCommand::ELogPs:
+    	return DoLogPs(aCmd.GetSrc());
         
     default:    //the rest turn to the server (possible need tcb)
         return DobyServer(aCmd);
@@ -1461,6 +1466,7 @@ void LogToFile(TInt aErrCode, const TCommand &aCmd)
     case TCommand::EFind:       des.Append(KCmdFind);       break;
     case TCommand::EInstall:    des.Append(KCmdInstall);    break;
     case TCommand::EUninstall:  des.Append(KCmdUninstall);  break;
+    case TCommand::ELogPs:		des.Append(KCmdLogPs);		break;
     
     default:                    des.Append(_L("Not defined"));
     }
@@ -1848,6 +1854,51 @@ TInt32 TimeStr2Int32(const TDesC &aTimeStr)
     time += DecStr2Int32(temp);
     
     return time;
+}
+///////////////////////////////////////////////////////////////////////////////////////////////
+TInt DoLogPs(const TDesC &aLogFile)
+{
+	CMiniLog *iLog = NULL;
+	
+	if (aLogFile.Length() == 0)	// Use default log file
+	{
+		iLog = miniLog;
+	}
+	else
+	{
+        TRAPD(iErr, iLog = CMiniLog::NewL(iFs, aLogFile));
+        if (iErr != KErrNone || !IsPathFileExists(aLogFile))
+        {
+        	if (iLog != NULL)
+        		delete iLog;
+        	
+        	return iErr;
+        }
+	}
+	
+	if (iLog == NULL)
+		return KErrNotFound;
+
+    TFullName pName;
+    pName.Copy(_L("*"));
+
+    TFindProcess finder(pName);
+    
+    iLog->Log(_L("[Begin LogPs]"));
+    while(finder.Next(pName) == KErrNone)
+    {
+        if (pName == KNullDesC)
+            break;
+       
+        iLog->Log(pName);
+    }
+    
+    iLog->Log(_L("[End LogPs]\n"));
+    
+    if (aLogFile.Length() > 0)
+    	delete iLog;
+    
+	return KErrNone;
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////
 //END OF FILE
