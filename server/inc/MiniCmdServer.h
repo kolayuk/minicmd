@@ -40,6 +40,8 @@ public:
 
     void IncrementSessions();
     void DecrementSessions();
+    
+    TInt GetSessionCount() const {	return iSessionCount;	}
 
 protected:
     TInt RunError(TInt aError);

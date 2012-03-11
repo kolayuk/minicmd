@@ -56,7 +56,8 @@ CMCServerSession::CMCServerSession(CMiniCmdServer& aServer)
 CMCServerSession::~CMCServerSession()
 {
     iServer.DecrementSessions();
-    CloseFileSession();
+    if (iServer.GetSessionCount() == 0)	//
+    	CloseFileSession();
 }
 
 void CMCServerSession::ServiceL(const RMessage2& aMessage)
