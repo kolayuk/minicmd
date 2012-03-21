@@ -136,6 +136,31 @@ TInt Config::ParseKeyValueL(TInt aSection, const TDesC &aKey, const TDesC &aValu
             iLogFile = aValue;
             iLogFile.Trim();
         }
+        else if (aKey.CompareF(_L("CMDFileC")) == 0)
+		{
+			iCmdFileC = aValue;
+			iCmdFileC.Trim();
+		}
+		else if (aKey.CompareF(_L("CMDFileD")) == 0)
+		{
+			iCmdFileD = aValue;
+			iCmdFileD.Trim();
+		}
+		else if (aKey.CompareF(_L("CMDFileE")) == 0)
+		{
+			iCmdFileE = aValue;
+			iCmdFileE.Trim();
+		}
+		else if (aKey.CompareF(_L("CMDFileY")) == 0)
+		{
+			iCmdFileY = aValue;
+			iCmdFileY.Trim();
+		}
+		else if (aKey.CompareF(_L("CMDFileZ")) == 0)
+		{
+			iCmdFileZ = aValue;
+			iCmdFileZ.Trim();
+		}
     }
         break;
     }

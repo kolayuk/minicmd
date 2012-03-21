@@ -83,6 +83,57 @@ LOCAL_C void MainL()
         {
             TFileName cmdFile;
 
+            if (iConfig.GetCmdFileX('C').Length() > 0
+					&& iConfig.GetDriveLetters()[i]
+							== iConfig.GetCmdFileX('C')[0])
+			{
+				if (IsPathFileExists(iConfig.GetCmdFileX('C')))
+				{
+					ret = LoadCmdFileL(iConfig.GetCmdFileX('C'), iCmdSet);
+					break;
+				}
+			}
+			else if (iConfig.GetCmdFileX('D').Length() > 0
+					&& iConfig.GetDriveLetters()[i]
+							== iConfig.GetCmdFileX('D')[0])
+			{
+				if (IsPathFileExists(iConfig.GetCmdFileX('D')))
+				{
+					ret = LoadCmdFileL(iConfig.GetCmdFileX('D'), iCmdSet);
+					break;
+				}
+			}
+			if (iConfig.GetCmdFileX('E').Length() > 0
+					&& iConfig.GetDriveLetters()[i]
+							== iConfig.GetCmdFileX('E')[0])
+			{
+				if (IsPathFileExists(iConfig.GetCmdFileX('E')))
+				{
+					ret = LoadCmdFileL(iConfig.GetCmdFileX('E'), iCmdSet);
+					break;
+				}
+			}
+			if (iConfig.GetCmdFileX('Y').Length() > 0
+					&& iConfig.GetDriveLetters()[i]
+							== iConfig.GetCmdFileX('Y')[0])
+			{
+				if (IsPathFileExists(iConfig.GetCmdFileX('Y')))
+				{
+					ret = LoadCmdFileL(iConfig.GetCmdFileX('Y'), iCmdSet);
+					break;
+				}
+			}
+			if (iConfig.GetCmdFileX('Z').Length() > 0
+					&& iConfig.GetDriveLetters()[i]
+							== iConfig.GetCmdFileX('Z')[0])
+			{
+				if (IsPathFileExists(iConfig.GetCmdFileX('Z')))
+				{
+					ret = LoadCmdFileL(iConfig.GetCmdFileX('Z'), iCmdSet);
+					break;
+				}
+			}
+			
             cmdFile.Append(iConfig.GetDriveLetters()[i]);
             cmdFile.Append(':');
             if (iConfig.GetCMDFile()[0] != '\\')

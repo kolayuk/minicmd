@@ -11,7 +11,7 @@
 ;
 ; UID is the exe's UID
 ;
-#{"MiniCMD v2.1"},(0xE132DCB3),2,1,0
+#{"MiniCMD v2.1"},(0xE132DCB3),2,1,1
 
 ;Language - standard language definitions
 &ZH
@@ -47,7 +47,7 @@ IF Option1
 ENDIF
 
 IF Option2
-	"MiniCMD2.ini"		- "!:\System\Apps\MiniCMD\MiniCMD2.ini"
+	"MiniCMD.ini"		- "!:\System\Apps\MiniCMD\MiniCMD2.ini"
 	"$(EPOCROOT)Epoc32\data\z\private\10003a3f\import\apps\MiniCMD2_reg.rsc" - "!:\private\10003a3f\import\apps\MiniCMD2_reg.rsc"
 	"$(EPOCROOT)Epoc32\data\z\resource\apps\MiniCMD2.rsc"         			- "!:\resource\apps\MiniCMD2.rsc"
 	"$(EPOCROOT)Epoc32\data\z\resource\apps\MiniCMD.mif"         			- "!:\resource\apps\MiniCMD2.mif"

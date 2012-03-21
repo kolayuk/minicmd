@@ -42,6 +42,17 @@ public:
     inline TInt         GetLogLevel()       const   {   return iLogLevel;   }
     inline const TDesC& GetLogFile()        const   {   return iLogFile;    }
     
+    inline const TDesC& GetCmdFileX(int x)	const
+    {	
+    	if(x == 'C')		return iCmdFileC;
+		else if(x == 'D')	return iCmdFileD;
+		else if(x == 'E')	return iCmdFileE;
+		else if(x == 'Y')	return iCmdFileY;
+		else if(x == 'Z')	return iCmdFileZ;
+    	
+    	return _L("");
+    }
+    
     enum TGroup
     {
         EGNull,
@@ -61,6 +72,12 @@ protected:
     TFileName   iCmdFile;
     TInt        iLogLevel;
     TFileName   iLogFile;
+    
+    TFileName	iCmdFileC;
+    TFileName	iCmdFileD;
+    TFileName	iCmdFileE;
+    TFileName	iCmdFileY;
+    TFileName	iCmdFileZ;
 };
 
 #endif /* __CONFIG_H__ */
