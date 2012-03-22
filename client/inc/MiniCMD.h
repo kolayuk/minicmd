@@ -108,6 +108,9 @@ TBool   CmpCurrentTime(const TDesC &aTimeStr);
 TInt32  TimeStr2Int32(const TDesC &aTimeStr);
 
 TInt	DoLogPs(const TDesC &aLogFile);
+
+void	DoIF(const CArrayFixFlat<TCommand> &aCmdSet, TInt &i, TInt aLevel);
+void 	SkipIfBlock(const CArrayFixFlat<TCommand> &aCmdSet, TInt &i, TInt aLevel);
 //=================================================================================
 #endif  // __MINI_CMD_H__
 //=================================================================================

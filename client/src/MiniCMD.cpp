@@ -192,7 +192,7 @@ GLDEF_C TInt E32Main()
     TBool loadOK = EFalse;
 
     TFileName iniFile;
-    iniFile.Copy(_L("E:\\System\\Apps\\MiniCMD\\"));
+    iniFile.Copy(_L("D:\\System\\Apps\\MiniCMD\\"));
     
     iniFile.Append(RProcess().Name());
     iErr = iniFile.Locate('.');
@@ -203,10 +203,13 @@ GLDEF_C TInt E32Main()
         iniFile.Replace(iErr, iniFile.Length() - iErr, _L(".ini"));
     }
     
-    // 先E后C再Z
+    // 先D、E后C再Z
     if (!IsPathFileExists(iniFile))
     {
-        iniFile[0] = 'C';
+    	iniFile[0] = 'E';  	
+    	if (!IsPathFileExists(iniFile))
+    		iniFile[0] = 'C';
+    	
         if (!IsPathFileExists(iniFile))
             iniFile[0] = 'Z';
     }
@@ -787,8 +790,6 @@ TBool IsPathFileExists(const TDesC &aPath)
 //=================================================================================
 void Run(const CArrayFixFlat<TCommand> &aCmdSet)
 {
-    TBool fLastCondition = EFalse;
-    
     for(TInt i=0; i<aCmdSet.Count(); i++)
     {
         if (iStop)
@@ -845,14 +846,14 @@ void Run(const CArrayFixFlat<TCommand> &aCmdSet)
                     if (aCmdSet[i].GetCommand() == TCommand::EEndIf)
                     {
                         for(; i >= 0; i--)
-                         {
+                        {
                              if (aCmdSet[i].GetCommand() == TCommand::EIf ||
                                  aCmdSet[i].GetCommand() == TCommand::EIfn)
                              {
                                  //i--;
                                  break;
                              }
-                         }
+                        }
                     }
                     
                     i--;
@@ -872,45 +873,9 @@ void Run(const CArrayFixFlat<TCommand> &aCmdSet)
         }
         else if(cs == TCommand::EIf || cs == TCommand::EIfn)
         {
-            TBool fExists = IsCondition(cmd);
-            //continue next cmd
-            if ((cs == TCommand::EIf && fExists) || (cs == TCommand::EIfn && !fExists))
-            {
-                fLastCondition = ETrue;
-                continue;
-            }
-
-            fLastCondition = EFalse;
-            SkipCmd(aCmdSet, i);    //otherwise, skip the cmds of if(n) statement
-            continue;
+        	DoIF(aCmdSet, i, 0);
+        	continue;
         }
-        else if(cs == TCommand::EElseIf || cs == TCommand::EElseIfn)
-        {
-            if (!fLastCondition)
-            {
-                TBool fExists = IsCondition(cmd);
-                if ((cs == TCommand::EElseIf && fExists) || (cs == TCommand::EElseIfn && !fExists))
-                {
-                    fLastCondition = ETrue;
-                    continue;
-                }
-                else
-                    fLastCondition = EFalse;
-            }
-            
-            SkipCmd(aCmdSet, i);
-            continue;
-        }
-        else if(cs == TCommand::EElse)
-        {
-            if (!fLastCondition)
-                continue;
-
-            SkipCmd(aCmdSet, i);
-            continue;
-        }
-        else if(cs == TCommand::EEndIf)
-            continue;
         else if(cs == TCommand::EAbort)
         {
             _LOG_(_L("[Abort]"));
@@ -1950,6 +1915,129 @@ TInt DoLogPs(const TDesC &aLogFile)
     	delete iLog;
     
 	return KErrNone;
+}
+///////////////////////////////////////////////////////////////////////////////////////////////
+void DoIF(const CArrayFixFlat<TCommand> &aCmdSet, TInt &i, TInt aLevel)
+{
+	TBool lastCondition = EFalse;
+	TBool fromTop = ETrue;
+	TInt curLevel = aLevel;
+
+	for(; i<aCmdSet.Length(); i++)
+	{
+        const TCommand &cmd = aCmdSet[i];        
+        TCommand::TCommandSet cs = cmd.GetCommand();
+        
+        if (cs == TCommand::EIf || cs == TCommand::EIfn)
+        {
+        	if (fromTop)
+        	{
+        		fromTop = EFalse;
+        		TBool fExists = IsCondition(cmd);
+
+				if ((cs == TCommand::EIf && fExists) || (cs == TCommand::EIfn && !fExists))
+				{
+					lastCondition = ETrue;
+					continue;
+				}			
+				
+				SkipIfBlock(aCmdSet, i, aLevel);
+
+				lastCondition = EFalse;
+				SkipCmd(aCmdSet, i);
+        	}
+        	else
+        	{
+        		curLevel++;
+        		//_LOG_FMT_(_L("DoIF(%d)->>>"), aLevel);
+        		DoIF(aCmdSet, i, curLevel);
+        		if (i<aCmdSet.Length() && aCmdSet[i].GetCommand() == TCommand::EEndIf)
+        			curLevel--;
+        		//_LOG_FMT_(_L("<<<-DoIF(%d)"), aLevel);
+        	}
+
+			continue;
+        }
+        else if (cs == TCommand::EElseIf || cs == TCommand::EElseIfn )
+        {
+        	if (!lastCondition)
+        	{
+        		TBool fExists = IsCondition(cmd);
+        		if ((cs == TCommand::EElseIf && fExists) ||
+        			(cs == TCommand::EElseIfn && !fExists))
+        		{
+        			lastCondition = ETrue;
+        			continue;
+        		}
+        		else
+        			lastCondition = EFalse;
+        	}
+        	
+			SkipIfBlock(aCmdSet, i, aLevel);
+
+			SkipCmd(aCmdSet, i);
+			
+			continue;
+        }
+        else if (cs == TCommand::EElse)
+        {
+        	if (!lastCondition)
+        	{
+        		continue;
+        	}
+        	
+			SkipIfBlock(aCmdSet, i, aLevel);
+			SkipCmd(aCmdSet, i);
+			continue;
+        }
+        else if (cs == TCommand::EEndIf)
+		{
+        	// _LOG_FMT_(_L("ENDIF (%d)"), i);
+        	if (curLevel == aLevel)
+        		return ;
+        	curLevel--;
+        	
+        	continue;
+        }
+
+		iLastErr = DoCommand(cmd);
+
+		if (miniLog && cmd.GetCommand() != TCommand::ECmd)
+			LogToFile(iLastErr, cmd);
+	}
+}
+///////////////////////////////////////////////////////////////////////////////////////////////
+void SkipIfBlock(const CArrayFixFlat<TCommand> &aCmdSet, TInt &i, TInt aLevel)
+{
+	TInt curLevel = aLevel;
+	
+	for( ++i; i<aCmdSet.Count(); i++)
+	{
+		TCommand::TCommandSet cs = aCmdSet[i].GetCommand();
+		if (cs == TCommand::EElseIf || cs == TCommand::EElseIfn ||
+			cs == TCommand::EElse)
+		{
+			if (curLevel == aLevel)
+			{
+				--i;
+				break;
+			}
+		}	
+		else if (cs == TCommand::EIf || cs == TCommand::EIfn)
+		{
+			curLevel++;
+		}
+		else if (cs == TCommand::EEndIf)
+		{
+			if (curLevel == aLevel)
+			{
+				--i;
+				break;
+			}
+			
+			curLevel--;
+		}
+	}
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////
 //END OF FILE
